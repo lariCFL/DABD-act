@@ -15,7 +15,7 @@ const PLATFORM_TAG = {
 function platformTag(p) { return PLATFORM_TAG[p] ?? 'tag-gray' }
 
 export default function ComptesPage() {
-  const { openModal, closeModal, showToast } = useApp()
+  const { user, openModal, closeModal, showToast } = useApp()
   const [search,     setSearch]     = useState('')
   const [memberId,   setMemberId]   = useState('')
   const [platformId, setPlatformId] = useState('')
@@ -162,33 +162,44 @@ export default function ComptesPage() {
               </tr>
             </thead>
             <tbody>
-              {accounts.map((a) => (
-                <tr key={a.id}>
-                  <td>
-                    <strong>{a.email ?? a.username}</strong>
-                    {a.email && a.username && <div className="cell-sub">{a.username}</div>}
-                  </td>
-                  <td>
-                    <span className={`tag ${platformTag(a.platformName ?? a.platform)}`}>
-                      {a.platformName ?? a.platform}
-                    </span>
-                  </td>
-                  <td>{a.memberName}</td>
-                  <td>{a.gameCount ?? '—'} jocs</td>
-                  <td style={{ color: 'var(--text3)', fontSize: 12 }}>{a.lastActivity ?? '—'}</td>
-                  <td style={{ display: 'flex', gap: 4 }}>
-                    <button className="btn btn-ghost btn-sm" onClick={() => openDetail(a)} title="Veure credencials">
-                      <i className="ti ti-eye" />
-                    </button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => openEdit(a)}>
-                      <i className="ti ti-pencil" /> Editar
-                    </button>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(a)}>
-                      <i className="ti ti-trash" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {accounts.map((a) => {
+                const isOwner = String(a.memberId) === String(user?.id)
+                return (
+                  <tr key={a.id}>
+                    <td>
+                      <strong>{a.email ?? a.username}</strong>
+                      {a.email && a.username && <div className="cell-sub">{a.username}</div>}
+                    </td>
+                    <td>
+                      <span className={`tag ${platformTag(a.platformName ?? a.platform)}`}>
+                        {a.platformName ?? a.platform}
+                      </span>
+                    </td>
+                    <td>{a.memberName}</td>
+                    <td>{a.gameCount ?? '—'} jocs</td>
+                    <td style={{ color: 'var(--text3)', fontSize: 12 }}>{a.lastActivity ?? '—'}</td>
+                    <td style={{ display: 'flex', gap: 4 }}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => openDetail(a)} title="Veure credencials">
+                        <i className="ti ti-eye" />
+                      </button>
+                      {isOwner ? (
+                        <>
+                          <button className="btn btn-ghost btn-sm" onClick={() => openEdit(a)}>
+                            <i className="ti ti-pencil" /> Editar
+                          </button>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(a)}>
+                            <i className="ti ti-trash" />
+                          </button>
+                        </>
+                      ) : (
+                        <span style={{ fontSize: 11, color: 'var(--text3)', padding: '5px 0' }}>
+                          Compte d'un altre membre
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

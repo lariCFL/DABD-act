@@ -150,7 +150,7 @@ export default function ValoracionsPage() {
             </thead>
             <tbody>
               {ratings.map((r) => {
-                const isOwn = user?.isAdmin || String(r.memberId) === String(user?.id)
+                const isOwn = String(r.memberId) === String(user?.id)
                 return (
                   <tr key={r.id}>
                     <td><strong>{r.targetEmoji ? `${r.targetEmoji} ` : ''}{r.targetName}</strong></td>

@@ -7,15 +7,6 @@ import Pagination from '../components/Pagination'
 
 const PAGE_LIMIT = 15
 
-const DEVICE_TYPES = [
-  'Windows PC', 'macOS', 'Linux',
-  'PlayStation 5', 'PlayStation 4',
-  'Xbox Series X', 'Xbox Series S', 'Xbox One',
-  'Nintendo Switch', 'Nintendo Switch OLED', 'Nintendo Switch Lite',
-  'iPhone', 'iPad', 'Android',
-  'Smart TV', 'Steam Deck',
-]
-
 export default function DispositiusPage() {
   const { user, openModal, closeModal, showToast } = useApp()
   const [search,   setSearch]   = useState('')
@@ -65,7 +56,7 @@ export default function DispositiusPage() {
         <DeviceForm
           initial={device}
           members={members}
-          isAdmin={user?.isAdmin}
+          isAdmin={false}
           currentUserId={user?.id}
           onSubmit={async (formData) => {
             try {
@@ -151,15 +142,19 @@ export default function DispositiusPage() {
             </thead>
             <tbody>
               {devices.map((d) => {
-                const canEdit = user?.isAdmin || String(d.memberId) === String(user?.id)
+                const canEdit = String(d.memberId) === String(user?.id)
                 return (
                   <tr key={d.id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <DeviceIcon type={d.type} />
+                        <DeviceIcon tipo={d.tipo} fabricant={d.fabricant} />
                         <div>
-                          <strong>{d.name ?? d.type}</strong>
-                          {d.name && <div className="cell-sub">{d.type}</div>}
+                          <strong>{d.nom ?? d.name}</strong>
+                          <div className="cell-sub">
+                            {d.tipo === 'Consola'
+                              ? `${d.fabricant} · Gen. ${d.generacio}`
+                              : d.sit_ope}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -195,19 +190,15 @@ export default function DispositiusPage() {
 }
 
 // ── Device Icon ───────────────────────────────────────────────────────────────
-function DeviceIcon({ type = '' }) {
-  const t = type.toLowerCase()
+function DeviceIcon({ tipo = '', fabricant = '' }) {
   let icon = 'device-desktop'
-  if (t.includes('playstation'))  icon = 'device-gamepad-2'
-  else if (t.includes('xbox'))    icon = 'brand-xbox'
-  else if (t.includes('nintendo') || t.includes('switch')) icon = 'device-gamepad'
-  else if (t.includes('iphone') || t.includes('android'))  icon = 'device-mobile'
-  else if (t.includes('ipad'))    icon = 'device-tablet'
-  else if (t.includes('macos'))   icon = 'brand-apple'
-  else if (t.includes('linux'))   icon = 'brand-ubuntu'
-  else if (t.includes('steam deck')) icon = 'device-gamepad-2'
-  else if (t.includes('tv'))      icon = 'device-tv'
-
+  if (tipo === 'Consola') {
+    const f = fabricant.toLowerCase()
+    if (f.includes('sony'))      icon = 'device-gamepad-2'
+    else if (f.includes('microsoft')) icon = 'brand-xbox'
+    else if (f.includes('nintendo')) icon = 'device-gamepad'
+    else icon = 'device-gamepad'
+  }
   return (
     <div style={{
       width: 34, height: 34, borderRadius: 8,
@@ -223,47 +214,59 @@ function DeviceIcon({ type = '' }) {
 // ── Device Form ───────────────────────────────────────────────────────────────
 function DeviceForm({ initial = {}, members, isAdmin, currentUserId, onSubmit, onCancel }) {
   const [form, setForm] = useState({
-    type:     initial.type     ?? '',
-    name:     initial.name     ?? '',
-    notes:    initial.notes    ?? '',
-    memberId: initial.memberId ?? (isAdmin ? '' : currentUserId ?? ''),
+    tipo:      initial.tipo      ?? '',
+    nom:       initial.nom       ?? initial.name ?? '',
+    fabricant: initial.fabricant ?? '',
+    generacio: initial.generacio ?? '',
+    sit_ope:   initial.sit_ope   ?? '',
+    notes:     initial.notes     ?? '',
+    memberId:  initial.memberId  ?? (isAdmin ? '' : currentUserId ?? ''),
   })
-  const [customType, setCustomType] = useState(!DEVICE_TYPES.includes(initial.type ?? ''))
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+  const isConsola   = form.tipo === 'Consola'
+  const isOrdinador = form.tipo === 'Ordinador'
+
+  const canSave =
+    form.tipo && form.nom &&
+    (isConsola   ? (form.fabricant && form.generacio) : true) &&
+    (isOrdinador ? form.sit_ope                       : true) &&
+    (isAdmin ? form.memberId : true)
 
   return (
     <>
       <div className="form-group">
-        <label>Tipus de dispositiu *</label>
-        {!customType ? (
-          <div style={{ display: 'flex', gap: 8 }}>
-            <select value={form.type} onChange={set('type')} style={{ flex: 1 }}>
-              <option value="">Selecciona un tipus...</option>
-              {DEVICE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setCustomType(true)}>
-              + Altre
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input
-              type="text" placeholder="p.e. Smart TV Samsung"
-              value={form.type} onChange={set('type')} style={{ flex: 1 }}
-            />
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setCustomType(false)}>
-              Llista
-            </button>
-          </div>
-        )}
+        <label>Categoria *</label>
+        <select value={form.tipo} onChange={set('tipo')}>
+          <option value="">Selecciona...</option>
+          <option value="Consola">Consola</option>
+          <option value="Ordinador">Ordinador / PC</option>
+        </select>
       </div>
       <div className="form-group">
-        <label>Nom personalitzat (opcional)</label>
-        <input type="text" placeholder='p.e. "La PlayStation del saló"' value={form.name} onChange={set('name')} />
+        <label>Nom del dispositiu *</label>
+        <input type="text" placeholder='p.e. "PS5 del saló"' value={form.nom} onChange={set('nom')} />
       </div>
+      {isConsola && (
+        <div className="form-row">
+          <div className="form-group">
+            <label>Fabricant *</label>
+            <input type="text" placeholder="p.e. Sony, Microsoft, Nintendo" value={form.fabricant} onChange={set('fabricant')} />
+          </div>
+          <div className="form-group">
+            <label>Generació *</label>
+            <input type="number" min={1} placeholder="p.e. 5" value={form.generacio} onChange={set('generacio')} />
+          </div>
+        </div>
+      )}
+      {isOrdinador && (
+        <div className="form-group">
+          <label>Sistema operatiu *</label>
+          <input type="text" placeholder="p.e. Windows, macOS, Linux, SteamOS" value={form.sit_ope} onChange={set('sit_ope')} />
+        </div>
+      )}
       <div className="form-group">
         <label>Notes (opcional)</label>
-        <input type="text" placeholder="p.e. Necessita adaptador HDMI" value={form.notes} onChange={set('notes')} />
+        <input type="text" placeholder="p.e. 4K HDR, 32GB RAM…" value={form.notes} onChange={set('notes')} />
       </div>
       {isAdmin ? (
         <div className="form-group">
@@ -280,11 +283,7 @@ function DeviceForm({ initial = {}, members, isAdmin, currentUserId, onSubmit, o
       )}
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
         <button className="btn btn-ghost" onClick={onCancel}>Cancel·lar</button>
-        <button
-          className="btn btn-primary"
-          onClick={() => onSubmit(form)}
-          disabled={!form.type || (!isAdmin && !form.memberId && !currentUserId)}
-        >
+        <button className="btn btn-primary" onClick={() => onSubmit(form)} disabled={!canSave}>
           Guardar
         </button>
       </div>

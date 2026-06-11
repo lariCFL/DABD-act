@@ -6,8 +6,45 @@ const middlewares = jsonServer.defaults()
 server.use(middlewares)
 server.use(jsonServer.bodyParser)
 
+// ── Auth helpers ───────────────────────────────────────────────────────────────
+// Token format: "mock-token-<userId>"
+function getCurrentUserId(req) {
+  const auth  = req.headers['authorization'] ?? ''
+  const token = auth.replace('Bearer ', '')
+  if (!token.startsWith('mock-token-')) return null
+  return token.replace('mock-token-', '')
+}
+
+// ── Duration helpers ───────────────────────────────────────────────────────────
+function parseSessionDate(str) {
+  if (!str) return null
+  if (str.includes('T')) return new Date(str)
+  // "dd/MM/yyyy HH:mm"
+  const [datePart, timePart = '00:00'] = str.split(' ')
+  const [day, month, year] = datePart.split('/')
+  const [hours, mins]      = timePart.split(':')
+  return new Date(+year, +month - 1, +day, +hours, +mins)
+}
+
+function formatDuration(startStr, endStr) {
+  const start = parseSessionDate(startStr)
+  const end   = endStr ? parseSessionDate(endStr) : new Date()
+  if (!start) return null
+  const ms        = Math.max(0, end - start)
+  const totalMins = Math.floor(ms / 60000)
+  const h = Math.floor(totalMins / 60)
+  const m = totalMins % 60
+  return h > 0 ? `${h}h ${m}min` : `${m}min`
+}
+
+function enrichSession(s) {
+  if (s.isLive) {
+    return { ...s, elapsed: formatDuration(s.startedAt, null), duration: null }
+  }
+  return { ...s, duration: formatDuration(s.startedAt, s.endedAt), elapsed: null }
+}
+
 // ── Auth mock ──────────────────────────────────────────────────────────────────
-// POST /api/auth/login  →  { token, user }
 server.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body ?? {}
   const db = router.db.getState()
@@ -17,12 +54,10 @@ server.post('/api/auth/login', (req, res) => {
   if (!authEntry) {
     return res.status(401).json({ message: 'Correu o contrasenya incorrectes.' })
   }
-  // Find the matching user (we just use /me for simplicity)
   const user = db.me
   res.json({ token: `mock-token-${authEntry.userId}`, user })
 })
 
-// POST /api/auth/logout  → 204
 server.post('/api/auth/logout', (_req, res) => res.status(204).end())
 
 // ── /me ────────────────────────────────────────────────────────────────────────
@@ -40,8 +75,10 @@ server.patch('/api/me', (req, res) => {
 
 // ── /dashboard ─────────────────────────────────────────────────────────────────
 server.get('/api/dashboard', (_req, res) => {
-  const db = router.db.getState()
-  res.json(db.dashboard)
+  const db   = router.db.getState()
+  const dash = db.dashboard
+  const recentSessions = (dash.recentSessions ?? []).map(enrichSession)
+  res.json({ ...dash, recentSessions })
 })
 
 // ── /family ────────────────────────────────────────────────────────────────────
@@ -52,12 +89,10 @@ server.get('/api/family', (_req, res) => {
   res.json(family)
 })
 
-// POST /api/family  →  create family
 server.post('/api/family', (req, res) => {
   const { name } = req.body ?? {}
   if (!name) return res.status(400).json({ message: 'El nom és obligatori.' })
   const db = router.db.getState()
-  // Check uniqueness (mock: only one family in db)
   if (db.family?.name === name) {
     return res.status(409).json({ message: `Ja existeix una família amb el nom "${name}".` })
   }
@@ -71,14 +106,12 @@ server.post('/api/family', (req, res) => {
   res.status(201).json(newFamily)
 })
 
-// DELETE /api/family/leave
 server.delete('/api/family/leave', (_req, res) => {
   const db = router.db.getState()
   const me = db.me
   if (me.isAdmin) {
     return res.status(400).json({ message: "L'administrador no pot sortir de la família sense transferir primer l'administració." })
   }
-  // Remove member from family
   const family = db.family
   if (family) {
     const members = (family.members ?? []).filter((m) => String(m.id) !== String(me.id))
@@ -89,7 +122,6 @@ server.delete('/api/family/leave', (_req, res) => {
   res.status(204).end()
 })
 
-// GET /api/family/members/:id/accounts
 server.get('/api/family/members/:id/accounts', (req, res) => {
   const db = router.db.getState()
   const accounts = (db.accounts?.data ?? []).filter(
@@ -98,24 +130,18 @@ server.get('/api/family/members/:id/accounts', (req, res) => {
   res.json(accounts)
 })
 
-// POST /api/family/members  → add member by email
 server.post('/api/family/members', (req, res) => {
   const { email } = req.body ?? {}
   if (!email) return res.status(400).json({ message: 'El correu electrònic és obligatori.' })
-  const db = router.db.getState()
-  const family = db.family
-  const members = family?.members ?? []
-
-  // Check member limit
+  const db      = router.db.getState()
+  const members = db.family?.members ?? []
   if (members.length >= 5) {
     return res.status(400).json({ message: 'La família ja ha arribat al límit de 5 membres.' })
   }
-  // Check if email already in family
   if (members.some((m) => m.email === email)) {
     return res.status(409).json({ message: 'Aquesta persona ja és membre de la família.' })
   }
-  // Mock: pretend the user exists and create them
-  const newId = `m_${Date.now()}`
+  const newId     = `m_${Date.now()}`
   const newMember = {
     id: newId, name: email.split('@')[0], email,
     isAdmin: false, age: 0, birthDate: '',
@@ -127,7 +153,6 @@ server.post('/api/family/members', (req, res) => {
   res.status(201).json(newMember)
 })
 
-// PATCH /api/family/members/:id
 server.patch('/api/family/members/:id', (req, res) => {
   const db = router.db.getState()
   const members = (db.family?.members ?? []).map((m) =>
@@ -137,7 +162,6 @@ server.patch('/api/family/members/:id', (req, res) => {
   res.json(members.find((m) => String(m.id) === String(req.params.id)))
 })
 
-// DELETE /api/family/members/:id
 server.delete('/api/family/members/:id', (req, res) => {
   const db = router.db.getState()
   const members = (db.family?.members ?? []).filter(
@@ -156,15 +180,11 @@ server.get('/api/games', (req, res) => {
     const s = req.query.search.toLowerCase()
     games = games.filter((g) => g.name.toLowerCase().includes(s))
   }
-  if (req.query.genre) {
-    games = games.filter((g) => g.genre === req.query.genre)
-  }
-  if (req.query.platform) {
-    games = games.filter((g) => (g.platforms ?? []).includes(req.query.platform))
-  }
+  if (req.query.genre)    games = games.filter((g) => g.genre === req.query.genre)
+  if (req.query.platform) games = games.filter((g) => (g.platforms ?? []).includes(req.query.platform))
   if (req.query.ownedByMe === 'true') {
-    const me = db.me
-    games = games.filter((g) => String(g.ownerId) === String(me.id) || me.isAdmin)
+    const uid = getCurrentUserId(req)
+    games = games.filter((g) => String(g.ownerId) === String(uid))
   }
   const page  = parseInt(req.query.page)  || 1
   const limit = parseInt(req.query.limit) || 12
@@ -172,30 +192,36 @@ server.get('/api/games', (req, res) => {
 })
 
 server.get('/api/games/:id', (req, res) => {
-  const db = router.db.getState()
+  const db   = router.db.getState()
   const game = (db.games?.data ?? []).find((g) => g.id === req.params.id)
   if (!game) return res.status(404).json({ message: 'Joc no trobat' })
   res.json(game)
 })
 
-// GET /api/games/:id/accounts
 server.get('/api/games/:id/accounts', (req, res) => {
-  const db = router.db.getState()
+  const db   = router.db.getState()
   const game = (db.games?.data ?? []).find((g) => g.id === req.params.id)
   if (!game) return res.status(404).json({ message: 'Joc no trobat' })
   res.json(game.accounts ?? [])
 })
 
 server.post('/api/games', (req, res) => {
-  const db = router.db.getState()
-  const newGame = { id: `g_${Date.now()}`, available: true, accounts: [], ...req.body, ownerId: db.me.id }
-  const games = [...(db.games?.data ?? []), newGame]
+  const db      = router.db.getState()
+  const ownerId = getCurrentUserId(req) ?? db.me.id
+  const newGame = { id: `g_${Date.now()}`, available: true, accounts: [], ...req.body, ownerId }
+  const games   = [...(db.games?.data ?? []), newGame]
   router.db.set('games.data', games).write()
   res.status(201).json(newGame)
 })
 
 server.patch('/api/games/:id', (req, res) => {
-  const db = router.db.getState()
+  const db  = router.db.getState()
+  const uid = getCurrentUserId(req)
+  const game = (db.games?.data ?? []).find((g) => g.id === req.params.id)
+  if (!game) return res.status(404).json({ message: 'Joc no trobat' })
+  if (String(game.ownerId) !== String(uid)) {
+    return res.status(403).json({ message: 'Només el propietari pot editar aquest joc.' })
+  }
   const games = (db.games?.data ?? []).map((g) =>
     g.id === req.params.id ? { ...g, ...req.body } : g
   )
@@ -204,9 +230,14 @@ server.patch('/api/games/:id', (req, res) => {
 })
 
 server.delete('/api/games/:id', (req, res) => {
-  const db = router.db.getState()
-  const games = (db.games?.data ?? []).filter((g) => g.id !== req.params.id)
-  router.db.set('games.data', games).write()
+  const db  = router.db.getState()
+  const uid = getCurrentUserId(req)
+  const game = (db.games?.data ?? []).find((g) => g.id === req.params.id)
+  if (!game) return res.status(404).json({ message: 'Joc no trobat' })
+  if (String(game.ownerId) !== String(uid)) {
+    return res.status(403).json({ message: 'Només el propietari pot eliminar aquest joc.' })
+  }
+  router.db.set('games.data', (db.games?.data ?? []).filter((g) => g.id !== req.params.id)).write()
   res.status(204).end()
 })
 
@@ -222,6 +253,8 @@ server.get('/api/sessions', (req, res) => {
   }
   if (req.query.memberId) sessions = sessions.filter((s) => String(s.memberId) === String(req.query.memberId))
   if (req.query.gameId)   sessions = sessions.filter((s) => String(s.gameId)   === String(req.query.gameId))
+  // Compute duration/elapsed on the backend for every session
+  sessions = sessions.map(enrichSession)
   const page  = parseInt(req.query.page)  || 1
   const limit = parseInt(req.query.limit) || 15
   res.json({ data: sessions, total: sessions.length, page, limit, totalPages: Math.ceil(sessions.length / limit) || 1 })
@@ -230,26 +263,25 @@ server.get('/api/sessions', (req, res) => {
 server.post('/api/sessions', (req, res) => {
   const db = router.db.getState()
   const { gameId, accountId } = req.body
-  // Mark game as unavailable
   const games = (db.games?.data ?? []).map((g) =>
     g.id === gameId ? { ...g, available: false } : g
   )
   router.db.set('games.data', games).write()
   const game    = games.find((g) => g.id === gameId)
   const account = (db.accounts?.data ?? []).find((a) => a.id === accountId)
+  const uid     = getCurrentUserId(req) ?? db.me.id
   const newSession = {
     id: `s_${Date.now()}`,
     gameId, accountId,
     gameName: game?.name ?? '', gameEmoji: game?.emoji ?? '🎮',
-    memberId: db.me.id, memberName: db.me.name,
+    memberId: uid, memberName: db.me.name,
     platform: account?.platformName ?? '',
     startedAt: new Date().toLocaleString('ca-ES'),
-    endedAt: null, isLive: true, duration: null, elapsed: '0min',
-    ...req.body
+    endedAt: null, isLive: true,
   }
   const sessions = [...(db.sessions?.data ?? []), newSession]
   router.db.set('sessions.data', sessions).write()
-  res.status(201).json(newSession)
+  res.status(201).json(enrichSession(newSession))
 })
 
 // ── /platforms ─────────────────────────────────────────────────────────────────
@@ -267,20 +299,20 @@ server.get('/api/platforms', (req, res) => {
 
 server.get('/api/platforms/:id', (req, res) => {
   const db = router.db.getState()
-  const p = (db.platforms?.data ?? []).find((x) => x.id === req.params.id)
+  const p  = (db.platforms?.data ?? []).find((x) => x.id === req.params.id)
   if (!p) return res.status(404).json({ message: 'Plataforma no trobada' })
   res.json(p)
 })
 
 server.post('/api/platforms', (req, res) => {
-  const db = router.db.getState()
+  const db   = router.db.getState()
   const newP = { id: `p_${Date.now()}`, gameCount: 0, avgRating: null, ...req.body }
   router.db.set('platforms.data', [...(db.platforms?.data ?? []), newP]).write()
   res.status(201).json(newP)
 })
 
 server.patch('/api/platforms/:id', (req, res) => {
-  const db = router.db.getState()
+  const db        = router.db.getState()
   const platforms = (db.platforms?.data ?? []).map((p) =>
     p.id === req.params.id ? { ...p, ...req.body } : p
   )
@@ -314,16 +346,16 @@ server.get('/api/accounts', (req, res) => {
 
 server.get('/api/accounts/:id', (req, res) => {
   const db = router.db.getState()
-  const a = (db.accounts?.data ?? []).find((x) => x.id === req.params.id)
+  const a  = (db.accounts?.data ?? []).find((x) => x.id === req.params.id)
   if (!a) return res.status(404).json({ message: 'Compte no trobat' })
   res.json(a)
 })
 
 server.post('/api/accounts', (req, res) => {
-  const db = router.db.getState()
+  const db       = router.db.getState()
   const member   = (db.family?.members ?? []).find((m) => String(m.id) === String(req.body.memberId))
   const platform = (db.platforms?.data ?? []).find((p) => String(p.id) === String(req.body.platformId))
-  const newAcc = {
+  const newAcc   = {
     id: `a_${Date.now()}`,
     memberName:   member?.name     ?? '',
     platformName: platform?.name   ?? req.body.platform ?? '',
@@ -335,7 +367,13 @@ server.post('/api/accounts', (req, res) => {
 })
 
 server.patch('/api/accounts/:id', (req, res) => {
-  const db = router.db.getState()
+  const db  = router.db.getState()
+  const uid = getCurrentUserId(req)
+  const acc = (db.accounts?.data ?? []).find((a) => a.id === req.params.id)
+  if (!acc) return res.status(404).json({ message: 'Compte no trobat' })
+  if (String(acc.memberId) !== String(uid)) {
+    return res.status(403).json({ message: 'Només el propietari pot editar aquest compte.' })
+  }
   const accounts = (db.accounts?.data ?? []).map((a) =>
     a.id === req.params.id ? { ...a, ...req.body } : a
   )
@@ -344,7 +382,13 @@ server.patch('/api/accounts/:id', (req, res) => {
 })
 
 server.delete('/api/accounts/:id', (req, res) => {
-  const db = router.db.getState()
+  const db  = router.db.getState()
+  const uid = getCurrentUserId(req)
+  const acc = (db.accounts?.data ?? []).find((a) => a.id === req.params.id)
+  if (!acc) return res.status(404).json({ message: 'Compte no trobat' })
+  if (String(acc.memberId) !== String(uid)) {
+    return res.status(403).json({ message: 'Només el propietari pot eliminar aquest compte.' })
+  }
   router.db.set('accounts.data', (db.accounts?.data ?? []).filter((a) => a.id !== req.params.id)).write()
   res.status(204).end()
 })
@@ -356,8 +400,10 @@ server.get('/api/devices', (req, res) => {
   if (req.query.search) {
     const s = req.query.search.toLowerCase()
     devices = devices.filter((d) =>
-      (d.type ?? '').toLowerCase().includes(s) ||
-      (d.name ?? '').toLowerCase().includes(s)
+      (d.nom    ?? d.name ?? '').toLowerCase().includes(s) ||
+      (d.tipo   ?? '').toLowerCase().includes(s) ||
+      (d.fabricant ?? '').toLowerCase().includes(s) ||
+      (d.sit_ope   ?? '').toLowerCase().includes(s)
     )
   }
   if (req.query.memberId) devices = devices.filter((d) => String(d.memberId) === String(req.query.memberId))
@@ -367,20 +413,29 @@ server.get('/api/devices', (req, res) => {
 })
 
 server.post('/api/devices', (req, res) => {
-  const db = router.db.getState()
-  const member = (db.family?.members ?? []).find((m) => String(m.id) === String(req.body.memberId))
+  const db     = router.db.getState()
+  const uid    = getCurrentUserId(req) ?? db.me.id
+  const memberId = req.body.memberId ?? uid
+  const member = (db.family?.members ?? []).find((m) => String(m.id) === String(memberId))
   const newDev = {
     id: `dev_${Date.now()}`,
     memberName: member?.name ?? '',
     createdAt: new Date().toISOString().slice(0, 10),
     ...req.body,
+    memberId,
   }
   router.db.set('devices.data', [...(db.devices?.data ?? []), newDev]).write()
   res.status(201).json(newDev)
 })
 
 server.patch('/api/devices/:id', (req, res) => {
-  const db = router.db.getState()
+  const db  = router.db.getState()
+  const uid = getCurrentUserId(req)
+  const dev = (db.devices?.data ?? []).find((d) => d.id === req.params.id)
+  if (!dev) return res.status(404).json({ message: 'Dispositiu no trobat' })
+  if (String(dev.memberId) !== String(uid)) {
+    return res.status(403).json({ message: 'Només el propietari pot editar aquest dispositiu.' })
+  }
   const devices = (db.devices?.data ?? []).map((d) =>
     d.id === req.params.id ? { ...d, ...req.body } : d
   )
@@ -389,7 +444,13 @@ server.patch('/api/devices/:id', (req, res) => {
 })
 
 server.delete('/api/devices/:id', (req, res) => {
-  const db = router.db.getState()
+  const db  = router.db.getState()
+  const uid = getCurrentUserId(req)
+  const dev = (db.devices?.data ?? []).find((d) => d.id === req.params.id)
+  if (!dev) return res.status(404).json({ message: 'Dispositiu no trobat' })
+  if (String(dev.memberId) !== String(uid)) {
+    return res.status(403).json({ message: 'Només el propietari pot eliminar aquest dispositiu.' })
+  }
   router.db.set('devices.data', (db.devices?.data ?? []).filter((d) => d.id !== req.params.id)).write()
   res.status(204).end()
 })
@@ -409,7 +470,8 @@ server.get('/api/ratings', (req, res) => {
 })
 
 server.post('/api/ratings', (req, res) => {
-  const db = router.db.getState()
+  const db  = router.db.getState()
+  const uid = getCurrentUserId(req) ?? db.me.id
   const { targetId, targetType } = req.body
   let target = null
   if (targetType === 'game')     target = (db.games?.data ?? []).find((g) => g.id === targetId)
@@ -418,7 +480,7 @@ server.post('/api/ratings', (req, res) => {
     id: `r_${Date.now()}`,
     targetName:  target?.name  ?? '',
     targetEmoji: target?.emoji ?? null,
-    memberId:    db.me.id,
+    memberId:    uid,
     memberName:  db.me.name,
     date: new Date().toLocaleDateString('ca-ES'),
     ...req.body,
@@ -428,7 +490,13 @@ server.post('/api/ratings', (req, res) => {
 })
 
 server.patch('/api/ratings/:id', (req, res) => {
-  const db = router.db.getState()
+  const db  = router.db.getState()
+  const uid = getCurrentUserId(req)
+  const rating = (db.ratings?.data ?? []).find((r) => r.id === req.params.id)
+  if (!rating) return res.status(404).json({ message: 'Valoració no trobada' })
+  if (String(rating.memberId) !== String(uid)) {
+    return res.status(403).json({ message: 'Només el propietari pot editar aquesta valoració.' })
+  }
   const ratings = (db.ratings?.data ?? []).map((r) =>
     r.id === req.params.id ? { ...r, ...req.body } : r
   )
@@ -437,7 +505,13 @@ server.patch('/api/ratings/:id', (req, res) => {
 })
 
 server.delete('/api/ratings/:id', (req, res) => {
-  const db = router.db.getState()
+  const db  = router.db.getState()
+  const uid = getCurrentUserId(req)
+  const rating = (db.ratings?.data ?? []).find((r) => r.id === req.params.id)
+  if (!rating) return res.status(404).json({ message: 'Valoració no trobada' })
+  if (String(rating.memberId) !== String(uid)) {
+    return res.status(403).json({ message: 'Només el propietari pot eliminar aquesta valoració.' })
+  }
   router.db.set('ratings.data', (db.ratings?.data ?? []).filter((r) => r.id !== req.params.id)).write()
   res.status(204).end()
 })

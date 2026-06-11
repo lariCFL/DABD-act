@@ -49,9 +49,7 @@
         "platform": "Nintendo eShop",
         "startedAt": "10/06/2026 09:45",
         "endedAt": null,
-        "isLive": true,
-        "duration": null,
-        "elapsed": "1h 12min"
+        "isLive": true
       },
       {
         "id": "s5",
@@ -61,9 +59,7 @@
         "platform": "PlayStation Store",
         "startedAt": "10/06/2026 08:30",
         "endedAt": "10/06/2026 10:00",
-        "isLive": false,
-        "duration": "1h 30min",
-        "elapsed": null
+        "isLive": false
       },
       {
         "id": "s6",
@@ -73,9 +69,7 @@
         "platform": "Steam",
         "startedAt": "09/06/2026 20:00",
         "endedAt": "09/06/2026 22:45",
-        "isLive": false,
-        "duration": "2h 45min",
-        "elapsed": null
+        "isLive": false
       }
     ],
     "popularGames": [
@@ -315,9 +309,7 @@
         "platform": "Nintendo eShop",
         "startedAt": "10/06/2026 09:45",
         "endedAt": null,
-        "isLive": true,
-        "duration": null,
-        "elapsed": "1h 12min"
+        "isLive": true
       },
       {
         "id": "s2",
@@ -330,9 +322,7 @@
         "platform": "PlayStation Store",
         "startedAt": "09/06/2026 17:00",
         "endedAt": "09/06/2026 18:30",
-        "isLive": false,
-        "duration": "1h 30min",
-        "elapsed": null
+        "isLive": false
       },
       {
         "id": "s3",
@@ -345,9 +335,7 @@
         "platform": "Steam",
         "startedAt": "08/06/2026 20:00",
         "endedAt": "08/06/2026 22:45",
-        "isLive": false,
-        "duration": "2h 45min",
-        "elapsed": null
+        "isLive": false
       },
       {
         "id": "s4",
@@ -360,9 +348,7 @@
         "platform": "PlayStation Store",
         "startedAt": "07/06/2026 22:00",
         "endedAt": "07/06/2026 23:50",
-        "isLive": false,
-        "duration": "1h 50min",
-        "elapsed": null
+        "isLive": false
       },
       {
         "id": "s5",
@@ -375,9 +361,7 @@
         "platform": "Steam",
         "startedAt": "06/06/2026 20:30",
         "endedAt": "06/06/2026 23:15",
-        "isLive": false,
-        "duration": "2h 45min",
-        "elapsed": null
+        "isLive": false
       }
     ],
     "total": 5,
@@ -507,8 +491,11 @@
         "id": "dev1",
         "memberId": "m1",
         "memberName": "Marc Puig",
-        "type": "PlayStation 5",
-        "name": "PS5 del saló",
+        "tipo": "Consola",
+        "nom": "PS5 del saló",
+        "fabricant": "Sony",
+        "generacio": 5,
+        "sit_ope": null,
         "notes": "TV principal, 4K HDR",
         "createdAt": "2024-01-10"
       },
@@ -516,8 +503,11 @@
         "id": "dev2",
         "memberId": "m1",
         "memberName": "Marc Puig",
-        "type": "Windows PC",
-        "name": "PC Gaming Marc",
+        "tipo": "Ordinador",
+        "nom": "PC Gaming Marc",
+        "fabricant": null,
+        "generacio": null,
+        "sit_ope": "Windows",
         "notes": "RTX 4070, 32GB RAM",
         "createdAt": "2023-06-15"
       },
@@ -525,8 +515,11 @@
         "id": "dev3",
         "memberId": "m2",
         "memberName": "Rosa Puig",
-        "type": "Xbox Series X",
-        "name": "Xbox del dormitori",
+        "tipo": "Consola",
+        "nom": "Xbox del dormitori",
+        "fabricant": "Microsoft",
+        "generacio": 9,
+        "sit_ope": null,
         "notes": null,
         "createdAt": "2024-03-20"
       },
@@ -534,8 +527,11 @@
         "id": "dev4",
         "memberId": "m3",
         "memberName": "Laia Puig",
-        "type": "Nintendo Switch",
-        "name": "Switch de la Laia",
+        "tipo": "Consola",
+        "nom": "Switch de la Laia",
+        "fabricant": "Nintendo",
+        "generacio": 1,
+        "sit_ope": null,
         "notes": "Versió OLED blava",
         "createdAt": "2023-12-25"
       },
@@ -543,8 +539,11 @@
         "id": "dev5",
         "memberId": "m4",
         "memberName": "Pau Puig",
-        "type": "Xbox Series S",
-        "name": null,
+        "tipo": "Consola",
+        "nom": "Xbox Series S",
+        "fabricant": "Microsoft",
+        "generacio": 9,
+        "sit_ope": null,
         "notes": null,
         "createdAt": "2024-02-01"
       },
@@ -552,8 +551,11 @@
         "id": "dev6",
         "memberId": "m5",
         "memberName": "Júlia Puig",
-        "type": "Steam Deck",
-        "name": "Steam Deck Júlia",
+        "tipo": "Ordinador",
+        "nom": "Steam Deck Júlia",
+        "fabricant": null,
+        "generacio": null,
+        "sit_ope": "SteamOS",
         "notes": "512GB SSD",
         "createdAt": "2024-05-10"
       }

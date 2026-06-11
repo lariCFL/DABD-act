@@ -212,7 +212,7 @@ export default function BibliotecaPage() {
                 </thead>
                 <tbody>
                   {gList.map((g) => {
-                    const isOwner = user?.isAdmin || String(g.ownerId) === String(user?.id)
+                    const isOwner = String(g.ownerId) === String(user?.id)
                     return (
                       <tr key={g.id}>
                         <td><strong>{g.emoji} {g.name}</strong></td>
