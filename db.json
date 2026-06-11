@@ -1,0 +1,1231 @@
+{
+  "me": {
+    "id": "m1",
+    "name": "SSDs fsa",
+    "email": "marc.puig@email.com",
+    "birthDate": "1988-03-14",
+    "isAdmin": true,
+    "familyName": "Família Puig",
+    "avatarColor": "#7c6cff",
+    "stats": {
+      "totalHours": 312,
+      "gamesPlayed": 14,
+      "ratings": 9,
+      "accounts": 2
+    }
+  },
+  "dashboard": {
+    "currentUserName": "Marc",
+    "stats": {
+      "totalGames": 37,
+      "totalPlatforms": 5,
+      "availableGames": 35,
+      "inUseGames": 2,
+      "memberCount": 5,
+      "familyName": "Família Puig",
+      "hoursThisMonth": 94,
+      "hoursVsLastMonth": "+18% vs mes anterior"
+    },
+    "activeSessions": [
+      {
+        "id": "s1",
+        "memberName": "Laia Puig",
+        "gameName": "The Legend of Zelda: Tears of the Kingdom",
+        "platform": "Nintendo Switch",
+        "startedAt": "2026-06-10T09:45:00"
+      },
+      {
+        "id": "s2",
+        "memberName": "Pau Puig",
+        "gameName": "FIFA 25",
+        "platform": "PlayStation 5",
+        "startedAt": "2026-06-10T10:20:00"
+      }
+    ],
+    "recentSessions": [
+      {
+        "id": "s1",
+        "gameName": "The Legend of Zelda: Tears of the Kingdom",
+        "gameEmoji": "🗡️",
+        "memberName": "Laia Puig",
+        "platform": "Nintendo Switch",
+        "startedAt": "2026-06-10T09:45:00",
+        "endedAt": null
+      },
+      {
+        "id": "s2",
+        "gameName": "FIFA 25",
+        "gameEmoji": "⚽",
+        "memberName": "Pau Puig",
+        "platform": "PlayStation 5",
+        "startedAt": "2026-06-10T10:20:00",
+        "endedAt": null
+      },
+      {
+        "id": "s20",
+        "gameName": "Minecraft",
+        "gameEmoji": "⛏️",
+        "memberName": "Marc Puig",
+        "platform": "Steam",
+        "startedAt": "2026-06-09T20:00:00",
+        "endedAt": "2026-06-09T22:30:00"
+      },
+      {
+        "id": "s19",
+        "gameName": "Hollow Knight",
+        "gameEmoji": "🦋",
+        "memberName": "Júlia Puig",
+        "platform": "Steam",
+        "startedAt": "2026-06-09T18:15:00",
+        "endedAt": "2026-06-09T20:45:00"
+      },
+      {
+        "id": "s18",
+        "gameName": "Red Dead Redemption 2",
+        "gameEmoji": "🤠",
+        "memberName": "Marc Puig",
+        "platform": "Steam",
+        "startedAt": "2026-06-08T21:00:00",
+        "endedAt": "2026-06-08T23:45:00"
+      },
+      {
+        "id": "s17",
+        "gameName": "Mario Kart 8 Deluxe",
+        "gameEmoji": "🏎️",
+        "memberName": "Laia Puig",
+        "platform": "Nintendo Switch",
+        "startedAt": "2026-06-08T17:30:00",
+        "endedAt": "2026-06-08T19:00:00"
+      }
+    ],
+    "popularGames": [
+      {
+        "id": "g3",
+        "name": "Minecraft",
+        "emoji": "⛏️",
+        "totalHours": 187
+      },
+      {
+        "id": "g1",
+        "name": "Zelda: TotK",
+        "emoji": "🗡️",
+        "totalHours": 142
+      },
+      {
+        "id": "g8",
+        "name": "FIFA 25",
+        "emoji": "⚽",
+        "totalHours": 98
+      },
+      {
+        "id": "g12",
+        "name": "Mario Kart 8 Deluxe",
+        "emoji": "🏎️",
+        "totalHours": 76
+      },
+      {
+        "id": "g5",
+        "name": "Red Dead Redemption 2",
+        "emoji": "🤠",
+        "totalHours": 65
+      }
+    ]
+  },
+  "family": {
+    "id": "f1",
+    "name": "Família Puig",
+    "memberCount": 5,
+    "total": 5,
+    "page": 1,
+    "limit": 12,
+    "totalPages": 1,
+    "members": [
+      {
+        "id": "m1",
+        "name": "Marc Puig",
+        "isAdmin": true,
+        "age": 38,
+        "birthDate": "1988-03-14",
+        "email": "marc.puig@email.com",
+        "avatarColor": "#7c6cff",
+        "avatarTextColor": "#fff",
+        "accountCount": 2,
+        "gameCount": 14,
+        "hoursThisMonth": 34
+      },
+      {
+        "id": "m2",
+        "name": "Rosa Puig",
+        "isAdmin": false,
+        "age": 36,
+        "birthDate": "1990-07-22",
+        "email": "rosa.puig@email.com",
+        "avatarColor": "#ec4899",
+        "avatarTextColor": "#fff",
+        "accountCount": 2,
+        "gameCount": 8,
+        "hoursThisMonth": 12
+      },
+      {
+        "id": "m3",
+        "name": "Laia Puig",
+        "isAdmin": false,
+        "age": 16,
+        "birthDate": "2010-01-05",
+        "email": "laia.puig@email.com",
+        "avatarColor": "#22d3ee",
+        "avatarTextColor": "#fff",
+        "accountCount": 2,
+        "gameCount": 18,
+        "hoursThisMonth": 27
+      },
+      {
+        "id": "m4",
+        "name": "Pau Puig",
+        "isAdmin": false,
+        "age": 13,
+        "birthDate": "2013-09-18",
+        "email": "pau.puig@email.com",
+        "avatarColor": "#f97316",
+        "avatarTextColor": "#fff",
+        "accountCount": 1,
+        "gameCount": 11,
+        "hoursThisMonth": 15
+      },
+      {
+        "id": "m5",
+        "name": "Júlia Puig",
+        "initials": "JP",
+        "isAdmin": false,
+        "age": 20,
+        "birthDate": "2006-04-30",
+        "email": "julia.puig@email.com",
+        "avatarColor": "#a3e635",
+        "avatarTextColor": "#111",
+        "accountCount": 3,
+        "gameCount": 22,
+        "hoursThisMonth": 41
+      }
+    ]
+  },
+  "distributors": {
+    "data": [
+      {
+        "id": "d1",
+        "name": "Steam",
+        "description": "Plataforma de Valve. El major distribuïdor de jocs per a PC.",
+        "devices": [
+          "Windows PC",
+          "macOS",
+          "Linux"
+        ],
+        "gameCount": 14,
+        "avgRating": 4.7
+      },
+      {
+        "id": "d2",
+        "name": "PlayStation Store",
+        "description": "Botiga digital oficial de Sony per a PlayStation 4 i 5.",
+        "devices": [
+          "PlayStation 5",
+          "PlayStation 4"
+        ],
+        "gameCount": 10,
+        "avgRating": 4.2
+      },
+      {
+        "id": "d3",
+        "name": "Nintendo eShop",
+        "description": "Botiga oficial de Nintendo per a Switch i Switch OLED.",
+        "devices": [
+          "Nintendo Switch"
+        ],
+        "gameCount": 9,
+        "avgRating": 4.8
+      },
+      {
+        "id": "d4",
+        "name": "Xbox Game Pass",
+        "description": "Servei de subscripció de Microsoft amb catàleg de centenars de jocs.",
+        "devices": [
+          "Xbox Series X",
+          "Xbox One",
+          "Windows PC"
+        ],
+        "gameCount": 4,
+        "avgRating": 4.5
+      }
+    ],
+    "total": 4,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 1
+  },
+  "accounts": [],
+  "games": {
+    "data": [
+      {
+        "id": "g1",
+        "name": "The Legend of Zelda: Tears of the Kingdom",
+        "emoji": "🗡️",
+        "genre": "Aventura",
+        "ageRating": 12,
+        "platforms": [
+          "Nintendo Switch"
+        ],
+        "distributorId": "d3",
+        "available": false,
+        "accounts": [
+          {
+            "id": "a5",
+            "username": "laia_switch",
+            "platform": "Nintendo Switch"
+          },
+          {
+            "id": "a9",
+            "username": "julia_switch",
+            "platform": "Nintendo Switch"
+          }
+        ]
+      },
+      {
+        "id": "g2",
+        "name": "The Legend of Zelda: Breath of the Wild",
+        "emoji": "🌿",
+        "genre": "Aventura",
+        "ageRating": 12,
+        "platforms": [
+          "Nintendo Switch"
+        ],
+        "distributorId": "d3",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a5",
+            "username": "laia_switch",
+            "platform": "Nintendo Switch"
+          }
+        ]
+      },
+      {
+        "id": "g3",
+        "name": "Minecraft",
+        "emoji": "⛏️",
+        "genre": "Sandbox",
+        "ageRating": 7,
+        "platforms": [
+          "Steam",
+          "Nintendo Switch",
+          "PlayStation 5"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a1",
+            "username": "marc_steam",
+            "platform": "Steam"
+          },
+          {
+            "id": "a5",
+            "username": "laia_switch",
+            "platform": "Nintendo Switch"
+          },
+          {
+            "id": "a7",
+            "username": "pau_psn",
+            "platform": "PlayStation 5"
+          }
+        ]
+      },
+      {
+        "id": "g4",
+        "name": "Hollow Knight",
+        "emoji": "🦋",
+        "genre": "Metroidvania",
+        "ageRating": 7,
+        "platforms": [
+          "Steam",
+          "Nintendo Switch"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a8",
+            "username": "julia_steam",
+            "platform": "Steam"
+          },
+          {
+            "id": "a5",
+            "username": "laia_switch",
+            "platform": "Nintendo Switch"
+          }
+        ]
+      },
+      {
+        "id": "g5",
+        "name": "Red Dead Redemption 2",
+        "emoji": "🤠",
+        "genre": "Acció i Aventura",
+        "ageRating": 18,
+        "platforms": [
+          "Steam",
+          "PlayStation 5"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a1",
+            "username": "marc_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g6",
+        "name": "Cyberpunk 2077",
+        "emoji": "🤖",
+        "genre": "RPG",
+        "ageRating": 18,
+        "platforms": [
+          "Steam"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a8",
+            "username": "julia_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g7",
+        "name": "Stardew Valley",
+        "emoji": "🌾",
+        "genre": "Simulació",
+        "ageRating": 0,
+        "platforms": [
+          "Steam",
+          "Nintendo Switch"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a3",
+            "username": "rosa_steam",
+            "platform": "Steam"
+          },
+          {
+            "id": "a9",
+            "username": "julia_switch",
+            "platform": "Nintendo Switch"
+          }
+        ]
+      },
+      {
+        "id": "g8",
+        "name": "FIFA 25",
+        "emoji": "⚽",
+        "genre": "Esports",
+        "ageRating": 3,
+        "platforms": [
+          "PlayStation 5",
+          "Steam"
+        ],
+        "distributorId": "d2",
+        "available": false,
+        "accounts": [
+          {
+            "id": "a7",
+            "username": "pau_psn",
+            "platform": "PlayStation 5"
+          },
+          {
+            "id": "a10",
+            "username": "julia_psn",
+            "platform": "PlayStation 5"
+          }
+        ]
+      },
+      {
+        "id": "g9",
+        "name": "Spider-Man 2",
+        "emoji": "🕷️",
+        "genre": "Acció",
+        "ageRating": 16,
+        "platforms": [
+          "PlayStation 5"
+        ],
+        "distributorId": "d2",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a7",
+            "username": "pau_psn",
+            "platform": "PlayStation 5"
+          },
+          {
+            "id": "a10",
+            "username": "julia_psn",
+            "platform": "PlayStation 5"
+          }
+        ]
+      },
+      {
+        "id": "g10",
+        "name": "God of War: Ragnarök",
+        "emoji": "⚡",
+        "genre": "Acció i Aventura",
+        "ageRating": 18,
+        "platforms": [
+          "PlayStation 5"
+        ],
+        "distributorId": "d2",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a10",
+            "username": "julia_psn",
+            "platform": "PlayStation 5"
+          }
+        ]
+      },
+      {
+        "id": "g11",
+        "name": "Horizon Forbidden West",
+        "emoji": "🏹",
+        "genre": "Acció i Aventura",
+        "ageRating": 16,
+        "platforms": [
+          "PlayStation 5"
+        ],
+        "distributorId": "d2",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a4",
+            "username": "RosaPuig_PSN",
+            "platform": "PlayStation 5"
+          }
+        ]
+      },
+      {
+        "id": "g12",
+        "name": "Mario Kart 8 Deluxe",
+        "emoji": "🏎️",
+        "genre": "Curses",
+        "ageRating": 3,
+        "platforms": [
+          "Nintendo Switch"
+        ],
+        "distributorId": "d3",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a5",
+            "username": "laia_switch",
+            "platform": "Nintendo Switch"
+          },
+          {
+            "id": "a9",
+            "username": "julia_switch",
+            "platform": "Nintendo Switch"
+          }
+        ]
+      },
+      {
+        "id": "g13",
+        "name": "Animal Crossing: New Horizons",
+        "emoji": "🏝️",
+        "genre": "Simulació",
+        "ageRating": 3,
+        "platforms": [
+          "Nintendo Switch"
+        ],
+        "distributorId": "d3",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a5",
+            "username": "laia_switch",
+            "platform": "Nintendo Switch"
+          },
+          {
+            "id": "a9",
+            "username": "julia_switch",
+            "platform": "Nintendo Switch"
+          }
+        ]
+      },
+      {
+        "id": "g14",
+        "name": "Super Mario Odyssey",
+        "emoji": "🎩",
+        "genre": "Plataformes",
+        "ageRating": 3,
+        "platforms": [
+          "Nintendo Switch"
+        ],
+        "distributorId": "d3",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a5",
+            "username": "laia_switch",
+            "platform": "Nintendo Switch"
+          }
+        ]
+      },
+      {
+        "id": "g15",
+        "name": "Splatoon 3",
+        "emoji": "🦑",
+        "genre": "Shooter",
+        "ageRating": 7,
+        "platforms": [
+          "Nintendo Switch"
+        ],
+        "distributorId": "d3",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a9",
+            "username": "julia_switch",
+            "platform": "Nintendo Switch"
+          }
+        ]
+      },
+      {
+        "id": "g16",
+        "name": "Pokémon Scarlet",
+        "emoji": "🔴",
+        "genre": "RPG",
+        "ageRating": 7,
+        "platforms": [
+          "Nintendo Switch"
+        ],
+        "distributorId": "d3",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a5",
+            "username": "laia_switch",
+            "platform": "Nintendo Switch"
+          }
+        ]
+      },
+      {
+        "id": "g17",
+        "name": "Elden Ring",
+        "emoji": "💍",
+        "genre": "RPG",
+        "ageRating": 16,
+        "platforms": [
+          "Steam",
+          "PlayStation 5"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a8",
+            "username": "julia_steam",
+            "platform": "Steam"
+          },
+          {
+            "id": "a10",
+            "username": "julia_psn",
+            "platform": "PlayStation 5"
+          }
+        ]
+      },
+      {
+        "id": "g18",
+        "name": "Hades",
+        "emoji": "🔥",
+        "genre": "Roguelike",
+        "ageRating": 12,
+        "platforms": [
+          "Steam",
+          "Nintendo Switch"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a8",
+            "username": "julia_steam",
+            "platform": "Steam"
+          },
+          {
+            "id": "a6",
+            "username": "laia_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g19",
+        "name": "The Witcher 3: Wild Hunt",
+        "emoji": "🐺",
+        "genre": "RPG",
+        "ageRating": 18,
+        "platforms": [
+          "Steam"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a1",
+            "username": "marc_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g20",
+        "name": "Portal 2",
+        "emoji": "🌀",
+        "genre": "Puzzles",
+        "ageRating": 12,
+        "platforms": [
+          "Steam"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a3",
+            "username": "rosa_steam",
+            "platform": "Steam"
+          },
+          {
+            "id": "a6",
+            "username": "laia_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g21",
+        "name": "Celeste",
+        "emoji": "🏔️",
+        "genre": "Plataformes",
+        "ageRating": 0,
+        "platforms": [
+          "Steam",
+          "Nintendo Switch"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a6",
+            "username": "laia_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g22",
+        "name": "Outer Wilds",
+        "emoji": "🚀",
+        "genre": "Exploració",
+        "ageRating": 12,
+        "platforms": [
+          "Steam"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a8",
+            "username": "julia_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g23",
+        "name": "Disco Elysium",
+        "emoji": "🕵️",
+        "genre": "RPG",
+        "ageRating": 18,
+        "platforms": [
+          "Steam"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a8",
+            "username": "julia_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g24",
+        "name": "It Takes Two",
+        "emoji": "🤝",
+        "genre": "Cooperatiu",
+        "ageRating": 12,
+        "platforms": [
+          "Steam",
+          "PlayStation 5"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a3",
+            "username": "rosa_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g25",
+        "name": "Overcooked! 2",
+        "emoji": "🍳",
+        "genre": "Cooperatiu",
+        "ageRating": 3,
+        "platforms": [
+          "Steam",
+          "Nintendo Switch"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a3",
+            "username": "rosa_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g26",
+        "name": "Returnal",
+        "emoji": "🌙",
+        "genre": "Roguelike",
+        "ageRating": 16,
+        "platforms": [
+          "PlayStation 5"
+        ],
+        "distributorId": "d2",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a4",
+            "username": "RosaPuig_PSN",
+            "platform": "PlayStation 5"
+          }
+        ]
+      },
+      {
+        "id": "g27",
+        "name": "Demon's Souls",
+        "emoji": "👿",
+        "genre": "RPG",
+        "ageRating": 16,
+        "platforms": [
+          "PlayStation 5"
+        ],
+        "distributorId": "d2",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a7",
+            "username": "pau_psn",
+            "platform": "PlayStation 5"
+          }
+        ]
+      },
+      {
+        "id": "g28",
+        "name": "Astro's Playroom",
+        "emoji": "🤖",
+        "genre": "Plataformes",
+        "ageRating": 7,
+        "platforms": [
+          "PlayStation 5"
+        ],
+        "distributorId": "d2",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a7",
+            "username": "pau_psn",
+            "platform": "PlayStation 5"
+          }
+        ]
+      },
+      {
+        "id": "g29",
+        "name": "Kirby and the Forgotten Land",
+        "emoji": "🌸",
+        "genre": "Plataformes",
+        "ageRating": 7,
+        "platforms": [
+          "Nintendo Switch"
+        ],
+        "distributorId": "d3",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a5",
+            "username": "laia_switch",
+            "platform": "Nintendo Switch"
+          }
+        ]
+      },
+      {
+        "id": "g30",
+        "name": "Among Us",
+        "emoji": "👾",
+        "genre": "Party",
+        "ageRating": 7,
+        "platforms": [
+          "Steam",
+          "Nintendo Switch"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a6",
+            "username": "laia_steam",
+            "platform": "Steam"
+          },
+          {
+            "id": "a9",
+            "username": "julia_switch",
+            "platform": "Nintendo Switch"
+          }
+        ]
+      },
+      {
+        "id": "g31",
+        "name": "Cuphead",
+        "emoji": "☕",
+        "genre": "Acció",
+        "ageRating": 7,
+        "platforms": [
+          "Steam",
+          "Nintendo Switch"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a6",
+            "username": "laia_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g32",
+        "name": "Dead Cells",
+        "emoji": "💀",
+        "genre": "Roguelike",
+        "ageRating": 16,
+        "platforms": [
+          "Steam"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a8",
+            "username": "julia_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g33",
+        "name": "Ori and the Will of the Wisps",
+        "emoji": "✨",
+        "genre": "Plataformes",
+        "ageRating": 7,
+        "platforms": [
+          "Xbox Game Pass",
+          "Steam"
+        ],
+        "distributorId": "d4",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a1",
+            "username": "marc_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g34",
+        "name": "Forza Horizon 5",
+        "emoji": "🏁",
+        "genre": "Curses",
+        "ageRating": 3,
+        "platforms": [
+          "Xbox Game Pass",
+          "Steam"
+        ],
+        "distributorId": "d4",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a1",
+            "username": "marc_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g35",
+        "name": "Sea of Thieves",
+        "emoji": "🏴‍☠️",
+        "genre": "Aventura",
+        "ageRating": 12,
+        "platforms": [
+          "Xbox Game Pass",
+          "Steam"
+        ],
+        "distributorId": "d4",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a1",
+            "username": "marc_steam",
+            "platform": "Steam"
+          }
+        ]
+      },
+      {
+        "id": "g36",
+        "name": "Halo Infinite",
+        "emoji": "🪖",
+        "genre": "Shooter",
+        "ageRating": 16,
+        "platforms": [
+          "Xbox Game Pass"
+        ],
+        "distributorId": "d4",
+        "available": true,
+        "accounts": []
+      },
+      {
+        "id": "g37",
+        "name": "Dave the Diver",
+        "emoji": "🤿",
+        "genre": "Aventura",
+        "ageRating": 7,
+        "platforms": [
+          "Steam"
+        ],
+        "distributorId": "d1",
+        "available": true,
+        "accounts": [
+          {
+            "id": "a8",
+            "username": "julia_steam",
+            "platform": "Steam"
+          }
+        ]
+      }
+    ],
+    "total": 37,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 4
+  },
+  "sessions": {
+    "gameId": "g2",
+    "accountId": "a5"
+  },
+  "ratings": {
+    "data": [
+      {
+        "id": "r1",
+        "targetId": "g1",
+        "targetType": "game",
+        "targetName": "The Legend of Zelda: Tears of the Kingdom",
+        "targetEmoji": "🗡️",
+        "memberId": "m3",
+        "memberName": "Laia Puig",
+        "score": 5,
+        "comment": "El millor joc que he jugat mai. La llibertat d'exploració és increïble.",
+        "date": "01/06/2026"
+      },
+      {
+        "id": "r2",
+        "targetId": "g1",
+        "targetType": "game",
+        "targetName": "The Legend of Zelda: Tears of the Kingdom",
+        "targetEmoji": "🗡️",
+        "memberId": "m5",
+        "memberName": "Júlia Puig",
+        "score": 5,
+        "comment": "Obra mestra. Les mecàniques de construcció son genials.",
+        "date": "15/05/2026"
+      },
+      {
+        "id": "r3",
+        "targetId": "g3",
+        "targetType": "game",
+        "targetName": "Minecraft",
+        "targetEmoji": "⛏️",
+        "memberId": "m1",
+        "memberName": "Marc Puig",
+        "score": 4,
+        "comment": "Clàssic inmortal. Ideal per jugar en família.",
+        "date": "20/05/2026"
+      },
+      {
+        "id": "r4",
+        "targetId": "g17",
+        "targetType": "game",
+        "targetName": "Elden Ring",
+        "targetEmoji": "💍",
+        "memberId": "m5",
+        "memberName": "Júlia Puig",
+        "score": 5,
+        "comment": "Brutalment difícil però increïblement satisfactori.",
+        "date": "10/05/2026"
+      },
+      {
+        "id": "r5",
+        "targetId": "g5",
+        "targetType": "game",
+        "targetName": "Red Dead Redemption 2",
+        "targetEmoji": "🤠",
+        "memberId": "m1",
+        "memberName": "Marc Puig",
+        "score": 5,
+        "comment": "La millor narrativa que he vist en un videojoc.",
+        "date": "05/05/2026"
+      },
+      {
+        "id": "r6",
+        "targetId": "g7",
+        "targetType": "game",
+        "targetName": "Stardew Valley",
+        "targetEmoji": "🌾",
+        "memberId": "m2",
+        "memberName": "Rosa Puig",
+        "score": 5,
+        "comment": "Perfecte per desconnectar. Molt relaxant.",
+        "date": "22/04/2026"
+      },
+      {
+        "id": "r7",
+        "targetId": "g8",
+        "targetType": "game",
+        "targetName": "FIFA 25",
+        "targetEmoji": "⚽",
+        "memberId": "m4",
+        "memberName": "Pau Puig",
+        "score": 4,
+        "comment": "Millor que el 24 però els servidors fallen sovint.",
+        "date": "18/04/2026"
+      },
+      {
+        "id": "r8",
+        "targetId": "g9",
+        "targetType": "game",
+        "targetName": "Spider-Man 2",
+        "targetEmoji": "🕷️",
+        "memberId": "m4",
+        "memberName": "Pau Puig",
+        "score": 5,
+        "comment": "Els gràfics son espectaculars i el combat és fluïd.",
+        "date": "12/04/2026"
+      },
+      {
+        "id": "r9",
+        "targetId": "g22",
+        "targetType": "game",
+        "targetName": "Outer Wilds",
+        "targetEmoji": "🚀",
+        "memberId": "m5",
+        "memberName": "Júlia Puig",
+        "score": 5,
+        "comment": "El joc més únic que he jugat mai. Imprescindible.",
+        "date": "08/04/2026"
+      },
+      {
+        "id": "r10",
+        "targetId": "g12",
+        "targetType": "game",
+        "targetName": "Mario Kart 8 Deluxe",
+        "targetEmoji": "🏎️",
+        "memberId": "m3",
+        "memberName": "Laia Puig",
+        "score": 4,
+        "comment": "Genial per jugar tots junts al sofà.",
+        "date": "30/03/2026"
+      },
+      {
+        "id": "r11",
+        "targetId": "d1",
+        "targetType": "distributor",
+        "targetName": "Steam",
+        "targetEmoji": "",
+        "memberId": "m1",
+        "memberName": "Marc Puig",
+        "score": 5,
+        "comment": "Les ofertes son increïbles i la biblioteca és enorme.",
+        "date": "15/04/2026"
+      },
+      {
+        "id": "r12",
+        "targetId": "d2",
+        "targetType": "distributor",
+        "targetName": "PlayStation Store",
+        "targetEmoji": "",
+        "memberId": "m4",
+        "memberName": "Pau Puig",
+        "score": 3,
+        "comment": "Els exclusius son bons però els preus son molt cars.",
+        "date": "20/03/2026"
+      },
+      {
+        "id": "r13",
+        "targetId": "d3",
+        "targetType": "distributor",
+        "targetName": "Nintendo eShop",
+        "targetEmoji": "",
+        "memberId": "m3",
+        "memberName": "Laia Puig",
+        "score": 4,
+        "comment": "Molt bon catàleg però els jocs mai baixen de preu.",
+        "date": "10/03/2026"
+      },
+      {
+        "id": "r14",
+        "targetId": "d4",
+        "targetType": "distributor",
+        "targetName": "Xbox Game Pass",
+        "targetEmoji": "",
+        "memberId": "m1",
+        "memberName": "Marc Puig",
+        "score": 4,
+        "comment": "Molt bon valor per diners. El Forza Horizon és un vici.",
+        "date": "05/03/2026"
+      }
+    ],
+    "total": 14,
+    "page": 1,
+    "limit": 15,
+    "totalPages": 1
+  }
+}
