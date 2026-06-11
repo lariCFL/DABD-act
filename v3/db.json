@@ -1,0 +1,634 @@
+{
+  "me": {
+    "id": "m1",
+    "name": "Marc Puig",
+    "email": "marc.puig@email.com",
+    "birthDate": "1988-03-14",
+    "isAdmin": true,
+    "familyId": "f1",
+    "familyName": "Família Puig",
+    "avatarColor": "#7c6cff",
+    "avatarTextColor": "#fff",
+    "stats": {
+      "totalHours": 312,
+      "gamesPlayed": 14,
+      "ratings": 9,
+      "accounts": 2
+    }
+  },
+  "auth": [
+    { "id": "auth1", "email": "marc.puig@email.com", "password": "demo1234", "userId": "m1" }
+  ],
+  "dashboard": {
+    "currentUserName": "Marc",
+    "stats": {
+      "totalGames": 37,
+      "totalPlatforms": 5,
+      "availableGames": 35,
+      "inUseGames": 2,
+      "memberCount": 5,
+      "familyName": "Família Puig",
+      "hoursThisMonth": 94,
+      "hoursVsLastMonth": "+18% vs mes anterior"
+    },
+    "activeSessions": [
+      {
+        "id": "s1",
+        "memberName": "Laia Puig",
+        "gameName": "The Legend of Zelda: Tears of the Kingdom",
+        "platform": "Nintendo eShop",
+        "startedAt": "2026-06-10T09:45:00"
+      }
+    ],
+    "recentSessions": [
+      {
+        "id": "s1",
+        "gameName": "The Legend of Zelda: Tears of the Kingdom",
+        "gameEmoji": "🗡️",
+        "memberName": "Laia Puig",
+        "platform": "Nintendo eShop",
+        "startedAt": "10/06/2026 09:45",
+        "endedAt": null,
+        "isLive": true,
+        "duration": null,
+        "elapsed": "1h 12min"
+      },
+      {
+        "id": "s5",
+        "gameName": "FIFA 25",
+        "gameEmoji": "⚽",
+        "memberName": "Pau Puig",
+        "platform": "PlayStation Store",
+        "startedAt": "10/06/2026 08:30",
+        "endedAt": "10/06/2026 10:00",
+        "isLive": false,
+        "duration": "1h 30min",
+        "elapsed": null
+      },
+      {
+        "id": "s6",
+        "gameName": "Minecraft",
+        "gameEmoji": "⛏️",
+        "memberName": "Júlia Puig",
+        "platform": "Steam",
+        "startedAt": "09/06/2026 20:00",
+        "endedAt": "09/06/2026 22:45",
+        "isLive": false,
+        "duration": "2h 45min",
+        "elapsed": null
+      }
+    ],
+    "popularGames": [
+      { "id": "g1", "name": "The Legend of Zelda: Tears of the Kingdom", "emoji": "🗡️", "totalHours": 142 },
+      { "id": "g5", "name": "Minecraft", "emoji": "⛏️", "totalHours": 98 },
+      { "id": "g3", "name": "FIFA 25", "emoji": "⚽", "totalHours": 76 }
+    ]
+  },
+  "family": {
+    "id": "f1",
+    "name": "Família Puig",
+    "memberCount": 5,
+    "total": 5,
+    "page": 1,
+    "limit": 12,
+    "totalPages": 1,
+    "members": [
+      {
+        "id": "m1",
+        "name": "Marc Puig",
+        "isAdmin": true,
+        "age": 38,
+        "birthDate": "1988-03-14",
+        "email": "marc.puig@email.com",
+        "avatarColor": "#7c6cff",
+        "avatarTextColor": "#fff",
+        "accountCount": 2,
+        "gameCount": 14,
+        "hoursThisMonth": 34
+      },
+      {
+        "id": "m2",
+        "name": "Rosa Puig",
+        "isAdmin": false,
+        "age": 36,
+        "birthDate": "1990-07-22",
+        "email": "rosa.puig@email.com",
+        "avatarColor": "#ec4899",
+        "avatarTextColor": "#fff",
+        "accountCount": 2,
+        "gameCount": 8,
+        "hoursThisMonth": 12
+      },
+      {
+        "id": "m3",
+        "name": "Laia Puig",
+        "isAdmin": false,
+        "age": 16,
+        "birthDate": "2010-01-05",
+        "email": "laia.puig@email.com",
+        "avatarColor": "#22d3ee",
+        "avatarTextColor": "#fff",
+        "accountCount": 2,
+        "gameCount": 18,
+        "hoursThisMonth": 27
+      },
+      {
+        "id": "m4",
+        "name": "Pau Puig",
+        "isAdmin": false,
+        "age": 13,
+        "birthDate": "2013-09-18",
+        "email": "pau.puig@email.com",
+        "avatarColor": "#f97316",
+        "avatarTextColor": "#fff",
+        "accountCount": 1,
+        "gameCount": 11,
+        "hoursThisMonth": 15
+      },
+      {
+        "id": "m5",
+        "name": "Júlia Puig",
+        "isAdmin": false,
+        "age": 20,
+        "birthDate": "2006-04-30",
+        "email": "julia.puig@email.com",
+        "avatarColor": "#a3e635",
+        "avatarTextColor": "#111",
+        "accountCount": 3,
+        "gameCount": 22,
+        "hoursThisMonth": 41
+      }
+    ]
+  },
+  "platforms": {
+    "data": [
+      {
+        "id": "p1",
+        "name": "Steam",
+        "description": "Plataforma de Valve. El major distribuïdor de jocs per a PC.",
+        "devices": ["Windows PC", "macOS", "Linux", "Steam Deck"],
+        "gameCount": 14,
+        "avgRating": 4.7
+      },
+      {
+        "id": "p2",
+        "name": "PlayStation Store",
+        "description": "Botiga digital oficial de Sony per a PlayStation 4 i 5.",
+        "devices": ["PlayStation 5", "PlayStation 4"],
+        "gameCount": 10,
+        "avgRating": 4.2
+      },
+      {
+        "id": "p3",
+        "name": "Nintendo eShop",
+        "description": "Botiga oficial de Nintendo per a Switch i Switch OLED.",
+        "devices": ["Nintendo Switch", "Nintendo Switch OLED"],
+        "gameCount": 9,
+        "avgRating": 4.8
+      },
+      {
+        "id": "p4",
+        "name": "Xbox Game Pass",
+        "description": "Servei de subscripció de Microsoft amb centenars de jocs.",
+        "devices": ["Xbox Series X", "Xbox Series S", "Xbox One", "Windows PC"],
+        "gameCount": 8,
+        "avgRating": 4.5
+      },
+      {
+        "id": "p5",
+        "name": "Epic Games Store",
+        "description": "Distribuïdor digital de Epic Games amb jocs gratuïts mensuals.",
+        "devices": ["Windows PC", "macOS"],
+        "gameCount": 6,
+        "avgRating": 3.9
+      }
+    ],
+    "total": 5,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 1
+  },
+  "games": {
+    "data": [
+      {
+        "id": "g1",
+        "name": "The Legend of Zelda: Tears of the Kingdom",
+        "emoji": "🗡️",
+        "genre": "Aventura",
+        "ageRating": 12,
+        "platforms": ["Nintendo eShop"],
+        "platformIds": ["p3"],
+        "ownerId": "m1",
+        "available": false,
+        "accounts": [
+          { "id": "a5", "username": "laia_switch", "email": "laia@nintendo.com", "password": "NintendoLaia99", "platform": "Nintendo eShop" },
+          { "id": "a9", "username": "julia_switch", "email": "julia@nintendo.com", "password": "JuliaSwitch22", "platform": "Nintendo eShop" }
+        ]
+      },
+      {
+        "id": "g2",
+        "name": "The Legend of Zelda: Breath of the Wild",
+        "emoji": "🌿",
+        "genre": "Aventura",
+        "ageRating": 12,
+        "platforms": ["Nintendo eShop"],
+        "platformIds": ["p3"],
+        "ownerId": "m1",
+        "available": true,
+        "accounts": [
+          { "id": "a5", "username": "laia_switch", "email": "laia@nintendo.com", "password": "NintendoLaia99", "platform": "Nintendo eShop" }
+        ]
+      },
+      {
+        "id": "g3",
+        "name": "FIFA 25",
+        "emoji": "⚽",
+        "genre": "Esports",
+        "ageRating": 3,
+        "platforms": ["PlayStation Store", "Xbox Game Pass"],
+        "platformIds": ["p2", "p4"],
+        "ownerId": "m2",
+        "available": true,
+        "accounts": [
+          { "id": "a2", "username": "rosa_psn", "email": "rosa@psn.com", "password": "PsnRosa2024", "platform": "PlayStation Store" }
+        ]
+      },
+      {
+        "id": "g4",
+        "name": "God of War Ragnarök",
+        "emoji": "🪓",
+        "genre": "Acció",
+        "ageRating": 18,
+        "platforms": ["PlayStation Store"],
+        "platformIds": ["p2"],
+        "ownerId": "m1",
+        "available": true,
+        "accounts": [
+          { "id": "a1", "username": "marc_psn", "email": "marc@psn.com", "password": "PsnMarc2024", "platform": "PlayStation Store" }
+        ]
+      },
+      {
+        "id": "g5",
+        "name": "Minecraft",
+        "emoji": "⛏️",
+        "genre": "Sandbox",
+        "ageRating": 7,
+        "platforms": ["Steam", "Xbox Game Pass"],
+        "platformIds": ["p1", "p4"],
+        "ownerId": "m3",
+        "available": true,
+        "accounts": [
+          { "id": "a3", "username": "marc_steam", "email": "marc@steam.com", "password": "SteamMarc!", "platform": "Steam" },
+          { "id": "a6", "username": "pau_xbox", "email": "pau@xbox.com", "password": "XboxPau123", "platform": "Xbox Game Pass" }
+        ]
+      },
+      {
+        "id": "g6",
+        "name": "Cyberpunk 2077",
+        "emoji": "🤖",
+        "genre": "RPG",
+        "ageRating": 18,
+        "platforms": ["Steam"],
+        "platformIds": ["p1"],
+        "ownerId": "m1",
+        "available": true,
+        "accounts": [
+          { "id": "a3", "username": "marc_steam", "email": "marc@steam.com", "password": "SteamMarc!", "platform": "Steam" }
+        ]
+      }
+    ],
+    "total": 6,
+    "page": 1,
+    "limit": 12,
+    "totalPages": 1
+  },
+  "sessions": {
+    "data": [
+      {
+        "id": "s1",
+        "gameId": "g1",
+        "gameName": "The Legend of Zelda: Tears of the Kingdom",
+        "gameEmoji": "🗡️",
+        "memberId": "m3",
+        "memberName": "Laia Puig",
+        "accountId": "a5",
+        "platform": "Nintendo eShop",
+        "startedAt": "10/06/2026 09:45",
+        "endedAt": null,
+        "isLive": true,
+        "duration": null,
+        "elapsed": "1h 12min"
+      },
+      {
+        "id": "s2",
+        "gameId": "g3",
+        "gameName": "FIFA 25",
+        "gameEmoji": "⚽",
+        "memberId": "m4",
+        "memberName": "Pau Puig",
+        "accountId": "a2",
+        "platform": "PlayStation Store",
+        "startedAt": "09/06/2026 17:00",
+        "endedAt": "09/06/2026 18:30",
+        "isLive": false,
+        "duration": "1h 30min",
+        "elapsed": null
+      },
+      {
+        "id": "s3",
+        "gameId": "g5",
+        "gameName": "Minecraft",
+        "gameEmoji": "⛏️",
+        "memberId": "m5",
+        "memberName": "Júlia Puig",
+        "accountId": "a3",
+        "platform": "Steam",
+        "startedAt": "08/06/2026 20:00",
+        "endedAt": "08/06/2026 22:45",
+        "isLive": false,
+        "duration": "2h 45min",
+        "elapsed": null
+      },
+      {
+        "id": "s4",
+        "gameId": "g4",
+        "gameName": "God of War Ragnarök",
+        "gameEmoji": "🪓",
+        "memberId": "m1",
+        "memberName": "Marc Puig",
+        "accountId": "a1",
+        "platform": "PlayStation Store",
+        "startedAt": "07/06/2026 22:00",
+        "endedAt": "07/06/2026 23:50",
+        "isLive": false,
+        "duration": "1h 50min",
+        "elapsed": null
+      },
+      {
+        "id": "s5",
+        "gameId": "g6",
+        "gameName": "Cyberpunk 2077",
+        "gameEmoji": "🤖",
+        "memberId": "m1",
+        "memberName": "Marc Puig",
+        "accountId": "a3",
+        "platform": "Steam",
+        "startedAt": "06/06/2026 20:30",
+        "endedAt": "06/06/2026 23:15",
+        "isLive": false,
+        "duration": "2h 45min",
+        "elapsed": null
+      }
+    ],
+    "total": 5,
+    "page": 1,
+    "limit": 15,
+    "totalPages": 1
+  },
+  "accounts": {
+    "data": [
+      {
+        "id": "a1",
+        "memberId": "m1",
+        "memberName": "Marc Puig",
+        "platformId": "p2",
+        "platformName": "PlayStation Store",
+        "username": "marc_psn",
+        "email": "marc@psn.com",
+        "password": "PsnMarc2024",
+        "gameCount": 4,
+        "lastActivity": "Avui"
+      },
+      {
+        "id": "a2",
+        "memberId": "m2",
+        "memberName": "Rosa Puig",
+        "platformId": "p2",
+        "platformName": "PlayStation Store",
+        "username": "rosa_psn",
+        "email": "rosa@psn.com",
+        "password": "PsnRosa2024",
+        "gameCount": 3,
+        "lastActivity": "Ahir"
+      },
+      {
+        "id": "a3",
+        "memberId": "m1",
+        "memberName": "Marc Puig",
+        "platformId": "p1",
+        "platformName": "Steam",
+        "username": "marc_steam",
+        "email": "marc@steam.com",
+        "password": "SteamMarc!",
+        "gameCount": 8,
+        "lastActivity": "Fa 2 dies"
+      },
+      {
+        "id": "a4",
+        "memberId": "m2",
+        "memberName": "Rosa Puig",
+        "platformId": "p4",
+        "platformName": "Xbox Game Pass",
+        "username": "rosa_xbox",
+        "email": "rosa@xbox.com",
+        "password": "XboxRosa99",
+        "gameCount": 5,
+        "lastActivity": "Fa 3 dies"
+      },
+      {
+        "id": "a5",
+        "memberId": "m3",
+        "memberName": "Laia Puig",
+        "platformId": "p3",
+        "platformName": "Nintendo eShop",
+        "username": "laia_switch",
+        "email": "laia@nintendo.com",
+        "password": "NintendoLaia99",
+        "gameCount": 6,
+        "lastActivity": "Avui"
+      },
+      {
+        "id": "a6",
+        "memberId": "m4",
+        "memberName": "Pau Puig",
+        "platformId": "p4",
+        "platformName": "Xbox Game Pass",
+        "username": "pau_xbox",
+        "email": "pau@xbox.com",
+        "password": "XboxPau123",
+        "gameCount": 7,
+        "lastActivity": "Ahir"
+      },
+      {
+        "id": "a7",
+        "memberId": "m5",
+        "memberName": "Júlia Puig",
+        "platformId": "p1",
+        "platformName": "Steam",
+        "username": "julia_steam",
+        "email": "julia@steam.com",
+        "password": "SteamJulia22",
+        "gameCount": 9,
+        "lastActivity": "Avui"
+      },
+      {
+        "id": "a8",
+        "memberId": "m5",
+        "memberName": "Júlia Puig",
+        "platformId": "p2",
+        "platformName": "PlayStation Store",
+        "username": "julia_psn",
+        "email": "julia@psn.com",
+        "password": "JuliaPSN2024",
+        "gameCount": 5,
+        "lastActivity": "Fa 1 setmana"
+      },
+      {
+        "id": "a9",
+        "memberId": "m3",
+        "memberName": "Laia Puig",
+        "platformId": "p3",
+        "platformName": "Nintendo eShop",
+        "username": "laia_switch2",
+        "email": "laia2@nintendo.com",
+        "password": "NintendoLaia2",
+        "gameCount": 3,
+        "lastActivity": "Fa 4 dies"
+      }
+    ],
+    "total": 9,
+    "page": 1,
+    "limit": 15,
+    "totalPages": 1
+  },
+  "devices": {
+    "data": [
+      {
+        "id": "dev1",
+        "memberId": "m1",
+        "memberName": "Marc Puig",
+        "type": "PlayStation 5",
+        "name": "PS5 del saló",
+        "notes": "TV principal, 4K HDR",
+        "createdAt": "2024-01-10"
+      },
+      {
+        "id": "dev2",
+        "memberId": "m1",
+        "memberName": "Marc Puig",
+        "type": "Windows PC",
+        "name": "PC Gaming Marc",
+        "notes": "RTX 4070, 32GB RAM",
+        "createdAt": "2023-06-15"
+      },
+      {
+        "id": "dev3",
+        "memberId": "m2",
+        "memberName": "Rosa Puig",
+        "type": "Xbox Series X",
+        "name": "Xbox del dormitori",
+        "notes": null,
+        "createdAt": "2024-03-20"
+      },
+      {
+        "id": "dev4",
+        "memberId": "m3",
+        "memberName": "Laia Puig",
+        "type": "Nintendo Switch",
+        "name": "Switch de la Laia",
+        "notes": "Versió OLED blava",
+        "createdAt": "2023-12-25"
+      },
+      {
+        "id": "dev5",
+        "memberId": "m4",
+        "memberName": "Pau Puig",
+        "type": "Xbox Series S",
+        "name": null,
+        "notes": null,
+        "createdAt": "2024-02-01"
+      },
+      {
+        "id": "dev6",
+        "memberId": "m5",
+        "memberName": "Júlia Puig",
+        "type": "Steam Deck",
+        "name": "Steam Deck Júlia",
+        "notes": "512GB SSD",
+        "createdAt": "2024-05-10"
+      }
+    ],
+    "total": 6,
+    "page": 1,
+    "limit": 15,
+    "totalPages": 1
+  },
+  "ratings": {
+    "data": [
+      {
+        "id": "r1",
+        "targetId": "g1",
+        "targetType": "game",
+        "targetName": "The Legend of Zelda: Tears of the Kingdom",
+        "targetEmoji": "🗡️",
+        "memberId": "m3",
+        "memberName": "Laia Puig",
+        "score": 5,
+        "comment": "El millor joc que he jugat mai. La llibertat d'exploració és increïble.",
+        "date": "01/06/2026"
+      },
+      {
+        "id": "r2",
+        "targetId": "g1",
+        "targetType": "game",
+        "targetName": "The Legend of Zelda: Tears of the Kingdom",
+        "targetEmoji": "🗡️",
+        "memberId": "m5",
+        "memberName": "Júlia Puig",
+        "score": 5,
+        "comment": "Obra mestra. Les mecàniques de construcció son genials.",
+        "date": "15/05/2026"
+      },
+      {
+        "id": "r3",
+        "targetId": "g4",
+        "targetType": "game",
+        "targetName": "God of War Ragnarök",
+        "targetEmoji": "🪓",
+        "memberId": "m1",
+        "memberName": "Marc Puig",
+        "score": 5,
+        "comment": "Narrativa excepcional, combat brutal.",
+        "date": "20/04/2026"
+      },
+      {
+        "id": "r4",
+        "targetId": "p1",
+        "targetType": "platform",
+        "targetName": "Steam",
+        "targetEmoji": null,
+        "memberId": "m1",
+        "memberName": "Marc Puig",
+        "score": 5,
+        "comment": "La millor plataforma per a PC gaming.",
+        "date": "10/03/2026"
+      },
+      {
+        "id": "r5",
+        "targetId": "p3",
+        "targetType": "platform",
+        "targetName": "Nintendo eShop",
+        "targetEmoji": null,
+        "memberId": "m3",
+        "memberName": "Laia Puig",
+        "score": 5,
+        "comment": "Perfecta per a Nintendo Switch.",
+        "date": "05/02/2026"
+      }
+    ],
+    "total": 5,
+    "page": 1,
+    "limit": 15,
+    "totalPages": 1
+  }
+}
