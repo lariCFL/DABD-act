@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useFetch } from '../hooks/useFetch'
-import { getGames, getPlatforms, createGame, updateGame, deleteGame, startSession, stopSession, getGameAccounts } from '../services/api'
+import { getGames, getPlatforms, createGame, updateGame, deleteGame, startSession, stopSession, getGameAccounts, getAccounts, getSessions } from '../services/api'
 import { useApp } from '../context/AppContext'
 import { LoadingState, ErrorState, EmptyState } from '../components/UI'
 import Pagination from '../components/Pagination'
@@ -37,9 +37,66 @@ export default function BibliotecaPage() {
   )
   const { data: platformsData } = useFetch(() => getPlatforms({ limit: 100 }), [])
 
+  // Family-wide accounts (for owner names) and live sessions (for per-account availability)
+  const { data: accountsData } = useFetch(() => getAccounts({ limit: 100 }), [])
+  const { data: sessionsData } = useFetch(() => getSessions({ limit: 100 }), [])
+
   const games      = data?.data ?? []
   const totalPages = data?.totalPages ?? 1
   const platforms  = platformsData?.data ?? platformsData ?? []
+  const allAccounts = accountsData?.data ?? []
+  const liveSessions = (sessionsData?.data ?? []).filter((s) => s.isLive)
+
+  const accountsById = useMemo(
+    () => new Map(allAccounts.map((a) => [String(a.id), a])),
+    [allAccounts]
+  )
+  const liveSessionsByKey = useMemo(
+    () => new Map(liveSessions.map((s) => [`${s.gameId}::${s.accountId}`, s])),
+    [liveSessions]
+  )
+
+  // Enrich a game's accounts with owner name and per-account availability
+  function enrichAccounts(gameId, rawAccounts) {
+    return (rawAccounts ?? []).map((a) => {
+      const full    = accountsById.get(String(a.id))
+      const session = liveSessionsByKey.get(`${gameId}::${a.id}`)
+      return {
+        ...a,
+        memberName: a.memberName ?? full?.memberName ?? '—',
+        platform:   a.platform   ?? full?.platformName,
+        username:   a.username   ?? full?.username,
+        email:      a.email      ?? full?.email,
+        password:   a.password   ?? full?.password,
+        available:        !session,
+        activeMemberId:   session?.memberId   ?? null,
+        activeMemberName: session?.memberName ?? null,
+        activeSessionId:  session?.id         ?? null,
+      }
+    })
+  }
+
+  // A game is only unavailable if ALL of its accounts are currently in use
+  function enrichGame(g) {
+    const accounts = enrichAccounts(g.id, g.accounts)
+    if (!accounts.length) return g
+    const available    = accounts.some((a) => a.available)
+    const inUseAccount = accounts.find((a) => !a.available)
+    const myAccount    = accounts.find((a) => String(a.activeMemberId) === String(user?.id))
+    return {
+      ...g,
+      accounts,
+      available,
+      activeMemberId:    inUseAccount?.activeMemberId   ?? g.activeMemberId   ?? null,
+      activeMemberName:  inUseAccount?.activeMemberName ?? g.activeMemberName ?? null,
+      myActiveSessionId: myAccount?.activeSessionId ?? null,
+    }
+  }
+
+  const enrichedGames = useMemo(
+    () => games.map(enrichGame),
+    [games, accountsById, liveSessionsByKey, user]
+  )
 
   // All genre options from current result set
   const allGenres = useMemo(() => [...new Set(games.map((g) => g.genre).filter(Boolean))], [games])
@@ -55,22 +112,25 @@ export default function BibliotecaPage() {
   // ── STOP ────────────────────────────────────────────────────────────────────
   async function handleStop(game) {
     try {
-      await stopSession(game.activeSessionId)
+      await stopSession(game.myActiveSessionId ?? game.activeSessionId)
       showToast(`Partida de ${game.name} finalitzada`); reload()
     } catch (e) { showToast(e.message, 'error') }
   }
 
   // ── PLAY ────────────────────────────────────────────────────────────────────
   async function openPlay(game) {
-    let accounts = game.accounts ?? []
-    // If not embedded, fetch from dedicated endpoint
-    if (!accounts.length) {
-      try { accounts = await getGameAccounts(game.id) } catch { accounts = [] }
+    let accounts = game.accounts
+    // If not embedded, fetch from dedicated endpoint and enrich locally
+    if (!accounts?.length) {
+      try { accounts = enrichAccounts(game.id, await getGameAccounts(game.id)) } catch { accounts = [] }
     }
+    const availableAccounts = accounts.filter((a) => a.available)
     openModal({
       title: `▶ Jugar a ${game.name}`,
       body: <PlayGameForm game={game} accounts={accounts} />,
-      footer: (
+      footer: availableAccounts.length === 0 ? (
+        <button className="btn btn-ghost" onClick={closeModal}>Tancar</button>
+      ) : (
         <>
           <button className="btn btn-ghost" onClick={closeModal}>Cancel·lar</button>
           <button className="btn btn-primary" onClick={async () => {
@@ -162,7 +222,7 @@ export default function BibliotecaPage() {
   if (editMode) {
     // Group games by platform
     const grouped = {}
-    games.forEach((g) => {
+    enrichedGames.forEach((g) => {
       const pls = g.platforms?.length ? g.platforms : ['Sense plataforma']
       pls.forEach((p) => {
         if (!grouped[p]) grouped[p] = []
@@ -290,16 +350,16 @@ export default function BibliotecaPage() {
         </select>
       </div>
 
-      {games.length === 0 ? (
+      {enrichedGames.length === 0 ? (
         <EmptyState icon="device-gamepad-2" title="Cap joc trobat" text="Prova a canviar els filtres de cerca." />
       ) : (
         <div className="cards-grid">
-          {games.map((g) => (
+          {enrichedGames.map((g) => (
             <GameCard
               key={g.id}
               game={g}
               onPlay={() => openPlay(g)}
-              onStop={String(g.activeMemberId) === String(user?.id) ? () => handleStop(g) : null}
+              onStop={g.myActiveSessionId ? () => handleStop(g) : null}
             />
           ))}
         </div>
@@ -341,7 +401,7 @@ function GameCard({ game: g, onPlay, onStop }) {
               <i className="ti ti-player-play" /> Jugar
             </button>
           )}
-          {!g.available && onStop && (
+          {onStop && (
             <button className="btn btn-danger btn-sm" style={{ width: '100%', justifyContent: 'center' }} onClick={onStop}>
               <i className="ti ti-player-stop" /> Aturar partida
             </button>
@@ -353,6 +413,11 @@ function GameCard({ game: g, onPlay, onStop }) {
 }
 
 function PlayGameForm({ game, accounts }) {
+  const availableAccounts = useMemo(() => accounts.filter((a) => a.available), [accounts])
+  const unavailableAccounts = useMemo(() => accounts.filter((a) => !a.available), [accounts])
+  const [selectedId, setSelectedId] = useState(availableAccounts[0]?.id ?? '')
+  const selected = accounts.find((a) => String(a.id) === String(selectedId))
+
   if (!accounts || accounts.length === 0) {
     return (
       <div style={{ color: 'var(--text2)', fontSize: 14, padding: '8px 0' }}>
@@ -362,6 +427,21 @@ function PlayGameForm({ game, accounts }) {
       </div>
     )
   }
+
+  if (availableAccounts.length === 0) {
+    return (
+      <div style={{ color: 'var(--text2)', fontSize: 14, padding: '8px 0' }}>
+        <i className="ti ti-alert-circle" style={{ color: 'var(--amber)', marginRight: 6 }} />
+        Tots els comptes de <strong>{game.name}</strong> estan actualment en ús.
+        <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text3)' }}>
+          {unavailableAccounts.map((a) => (
+            <div key={a.id}>{a.memberName} — {a.platform} (en ús{a.activeMemberName ? ` per ${a.activeMemberName}` : ''})</div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <>
       <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16 }}>
@@ -369,22 +449,45 @@ function PlayGameForm({ game, accounts }) {
       </p>
       <div className="form-group" style={{ marginBottom: 0 }}>
         <label>Compte a utilitzar</label>
-        <select id="play-account">
-          {accounts.map((a) => (
+        <select id="play-account" value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
+          {availableAccounts.map((a) => (
             <option key={a.id} value={a.id}>
-              {a.platform} — {a.email ?? a.username}
+              {a.memberName} — {a.platform}
             </option>
           ))}
         </select>
       </div>
-      {accounts.map((a) => (
-        <div key={a.id} className="play-account-detail" id={`detail-${a.id}`}>
-          <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 4, paddingLeft: 2 }}>
-            {a.email && <span>📧 {a.email}</span>}
-            {a.password && <span style={{ marginLeft: 12 }}>🔑 {a.password}</span>}
-          </div>
+      {unavailableAccounts.length > 0 && (
+        <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 6 }}>
+          No disponibles: {unavailableAccounts.map((a) => `${a.memberName} — ${a.platform}${a.activeMemberName ? ` (en ús per ${a.activeMemberName})` : ' (en ús)'}`).join(', ')}
         </div>
-      ))}
+      )}
+      {selected && (
+        <div className="play-account-detail" style={{ marginTop: 16 }}>
+          <div className="info-row">
+            <span className="key">Propietari</span>
+            <span className="val">{selected.memberName}</span>
+          </div>
+          {selected.email && (
+            <div className="info-row">
+              <span className="key">Correu electrònic</span>
+              <span className="val">{selected.email}</span>
+            </div>
+          )}
+          {selected.username && (
+            <div className="info-row">
+              <span className="key">Nom d'usuari</span>
+              <span className="val">{selected.username}</span>
+            </div>
+          )}
+          {selected.password && (
+            <div className="info-row">
+              <span className="key">Contrasenya</span>
+              <span className="val">{selected.password}</span>
+            </div>
+          )}
+        </div>
+      )}
     </>
   )
 }
