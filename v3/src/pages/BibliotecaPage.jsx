@@ -31,21 +31,31 @@ export default function BibliotecaPage() {
   const browseParams = { search, genre, platform, page, limit: PAGE_LIMIT }
   const editParams   = { search: editSearch, platform: editPlatform, ownedByMe: true, page: 1, limit: 100 }
 
-  const { data, loading, error, reload } = useFetch(
+  const { data, loading, error, reload: reloadGames } = useFetch(
     () => getGames(editMode ? editParams : browseParams),
     [editMode, search, genre, platform, editSearch, editPlatform, page]
   )
   const { data: platformsData } = useFetch(() => getPlatforms({ limit: 100 }), [])
 
   // Family-wide accounts (for owner names) and live sessions (for per-account availability)
-  const { data: accountsData } = useFetch(() => getAccounts({ limit: 100 }), [])
-  const { data: sessionsData } = useFetch(() => getSessions({ limit: 100 }), [])
+  const { data: accountsData, reload: reloadAccounts } = useFetch(() => getAccounts({ limit: 100 }), [])
+  const { data: sessionsData, reload: reloadSessions } = useFetch(() => getSessions({ limit: 100 }), [])
+
+  // Games, accounts and sessions are interdependent for availability — always refresh together
+  function reload() {
+    reloadGames()
+    reloadAccounts()
+    reloadSessions()
+  }
 
   const games      = data?.data ?? []
   const totalPages = data?.totalPages ?? 1
   const platforms  = platformsData?.data ?? platformsData ?? []
   const allAccounts = accountsData?.data ?? []
-  const liveSessions = (sessionsData?.data ?? []).filter((s) => s.isLive)
+  const liveSessions = useMemo(
+    () => (sessionsData?.data ?? []).filter((s) => s.isLive),
+    [sessionsData]
+  )
 
   const accountsById = useMemo(
     () => new Map(allAccounts.map((a) => [String(a.id), a])),
@@ -78,24 +88,33 @@ export default function BibliotecaPage() {
 
   // A game is only unavailable if ALL of its accounts are currently in use
   function enrichGame(g) {
+    // Detect the current user's own live session for this game, regardless of
+    // whether per-account data is embedded — this drives the Stop button.
+    const mySession = liveSessions.find(
+      (s) => String(s.gameId) === String(g.id) && String(s.memberId) === String(user?.id)
+    )
+    const myActiveSessionId = mySession?.id ?? (
+      String(g.activeMemberId) === String(user?.id) ? (g.activeSessionId ?? null) : null
+    )
+
     const accounts = enrichAccounts(g.id, g.accounts)
-    if (!accounts.length) return g
+    if (!accounts.length) return { ...g, myActiveSessionId }
+
     const available    = accounts.some((a) => a.available)
     const inUseAccount = accounts.find((a) => !a.available)
-    const myAccount    = accounts.find((a) => String(a.activeMemberId) === String(user?.id))
     return {
       ...g,
       accounts,
       available,
       activeMemberId:    inUseAccount?.activeMemberId   ?? g.activeMemberId   ?? null,
       activeMemberName:  inUseAccount?.activeMemberName ?? g.activeMemberName ?? null,
-      myActiveSessionId: myAccount?.activeSessionId ?? null,
+      myActiveSessionId,
     }
   }
 
   const enrichedGames = useMemo(
     () => games.map(enrichGame),
-    [games, accountsById, liveSessionsByKey, user]
+    [games, accountsById, liveSessionsByKey, liveSessions, user]
   )
 
   // All genre options from current result set
