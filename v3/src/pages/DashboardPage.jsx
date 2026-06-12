@@ -1,11 +1,18 @@
 import { useFetch } from '../hooks/useFetch'
-import { getDashboard } from '../services/api'
+import { getDashboard, stopSession } from '../services/api'
 import { LoadingState, ErrorState } from '../components/UI'
 import { useApp } from '../context/AppContext'
 
 export default function DashboardPage() {
-  const { user } = useApp()
+  const { user, showToast } = useApp()
   const { data, loading, error, reload } = useFetch(getDashboard, [])
+
+  async function handleStop(session) {
+    try {
+      await stopSession(session.id)
+      showToast(`Partida de ${session.gameName} finalitzada`); reload()
+    } catch (e) { showToast(e.message, 'error') }
+  }
 
   if (loading) return <LoadingState />
   if (error)   return <ErrorState message={error} onRetry={reload} />
@@ -70,19 +77,34 @@ export default function DashboardPage() {
                 Encara no hi ha partides registrades.
               </div>
             )}
-            {recentSessions?.map((s) => (
-              <div className="session-item" key={s.id}>
-                <div className="game-icon">{s.gameEmoji}</div>
-                <div className="session-info">
-                  <strong>{s.gameName}</strong>
-                  <span>{s.memberName} · {s.platform}</span>
+            {recentSessions?.map((s) => {
+              const isOwn = String(s.memberId) === String(user?.id)
+              return (
+                <div className="session-item" key={s.id}>
+                  <div className="game-icon">{s.gameEmoji}</div>
+                  <div className="session-info">
+                    <strong>{s.gameName}</strong>
+                    <span>{s.memberName} · {s.platform}</span>
+                  </div>
+                  {s.isLive ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div className="session-live"><span className="pulse" />En curs</div>
+                      {isOwn && (
+                        <button
+                          className="btn btn-danger btn-sm"
+                          style={{ padding: '3px 8px', fontSize: 11 }}
+                          onClick={() => handleStop(s)}
+                        >
+                          <i className="ti ti-player-stop" /> Aturar
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="session-duration">{s.duration}</div>
+                  )}
                 </div>
-                {s.isLive
-                  ? <div className="session-live"><span className="pulse" />En curs</div>
-                  : <div className="session-duration">{s.duration}</div>
-                }
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 

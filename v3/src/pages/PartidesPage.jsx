@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useFetch } from '../hooks/useFetch'
-import { getSessions, getFamily, getGames } from '../services/api'
+import { getSessions, stopSession, getFamily, getGames } from '../services/api'
+import { useApp } from '../context/AppContext'
 import { LoadingState, ErrorState, EmptyState } from '../components/UI'
 import Pagination from '../components/Pagination'
 
@@ -14,6 +15,7 @@ const PLATFORM_TAG = {
 function platformTag(p) { return PLATFORM_TAG[p] ?? 'tag-gray' }
 
 export default function PartidesPage() {
+  const { user, showToast } = useApp()
   const [search,   setSearch]   = useState('')
   const [memberId, setMemberId] = useState('')
   const [gameId,   setGameId]   = useState('')
@@ -25,6 +27,13 @@ export default function PartidesPage() {
   )
   const { data: family   } = useFetch(getFamily, [])
   const { data: gamesRes } = useFetch(() => getGames({ limit: 200 }), [])
+
+  async function handleStop(session) {
+    try {
+      await stopSession(session.id)
+      showToast(`Partida de ${session.gameName} finalitzada`); reload()
+    } catch (e) { showToast(e.message, 'error') }
+  }
 
   const sessions   = data?.data ?? []
   const totalPages = data?.totalPages ?? 1
@@ -88,31 +97,42 @@ export default function PartidesPage() {
                 <th>Inici</th>
                 <th>Fi</th>
                 <th>Durada</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
-              {sessions.map((s) => (
-                <tr key={s.id}>
-                  <td><strong>{s.gameEmoji} {s.gameName}</strong></td>
-                  <td>{s.memberName}</td>
-                  <td>
-                    <span className={`tag ${platformTag(s.platform)}`}>{s.platform}</span>
-                  </td>
-                  <td style={{ color: 'var(--text2)', fontSize: 12 }}>{s.startedAt}</td>
-                  <td>
-                    {s.isLive
-                      ? <span className="session-live"><span className="pulse" />En curs</span>
-                      : <span style={{ color: 'var(--text2)', fontSize: 12 }}>{s.endedAt}</span>
-                    }
-                  </td>
-                  <td>
-                    {s.isLive
-                      ? <span style={{ color: 'var(--green)', fontWeight: 600, fontSize: 13 }}>+{s.elapsed}</span>
-                      : <span className="session-duration">{s.duration}</span>
-                    }
-                  </td>
-                </tr>
-              ))}
+              {sessions.map((s) => {
+                const isOwn = String(s.memberId) === String(user?.id)
+                return (
+                  <tr key={s.id}>
+                    <td><strong>{s.gameEmoji} {s.gameName}</strong></td>
+                    <td>{s.memberName}</td>
+                    <td>
+                      <span className={`tag ${platformTag(s.platform)}`}>{s.platform}</span>
+                    </td>
+                    <td style={{ color: 'var(--text2)', fontSize: 12 }}>{s.startedAt}</td>
+                    <td>
+                      {s.isLive
+                        ? <span className="session-live"><span className="pulse" />En curs</span>
+                        : <span style={{ color: 'var(--text2)', fontSize: 12 }}>{s.endedAt}</span>
+                      }
+                    </td>
+                    <td>
+                      {s.isLive
+                        ? <span style={{ color: 'var(--green)', fontWeight: 600, fontSize: 13 }}>+{s.elapsed}</span>
+                        : <span className="session-duration">{s.duration}</span>
+                      }
+                    </td>
+                    <td>
+                      {s.isLive && isOwn && (
+                        <button className="btn btn-danger btn-sm" onClick={() => handleStop(s)}>
+                          <i className="ti ti-player-stop" /> Aturar
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

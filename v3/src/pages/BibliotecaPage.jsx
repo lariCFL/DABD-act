@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useFetch } from '../hooks/useFetch'
-import { getGames, getPlatforms, createGame, updateGame, deleteGame, startSession, getGameAccounts } from '../services/api'
+import { getGames, getPlatforms, createGame, updateGame, deleteGame, startSession, stopSession, getGameAccounts } from '../services/api'
 import { useApp } from '../context/AppContext'
 import { LoadingState, ErrorState, EmptyState } from '../components/UI'
 import Pagination from '../components/Pagination'
@@ -50,6 +50,14 @@ export default function BibliotecaPage() {
   function toggleEditMode() {
     setEditMode((m) => !m)
     setEditSearch(''); setEditPlatform('')
+  }
+
+  // ── STOP ────────────────────────────────────────────────────────────────────
+  async function handleStop(game) {
+    try {
+      await stopSession(game.activeSessionId)
+      showToast(`Partida de ${game.name} finalitzada`); reload()
+    } catch (e) { showToast(e.message, 'error') }
   }
 
   // ── PLAY ────────────────────────────────────────────────────────────────────
@@ -287,7 +295,12 @@ export default function BibliotecaPage() {
       ) : (
         <div className="cards-grid">
           {games.map((g) => (
-            <GameCard key={g.id} game={g} onPlay={() => openPlay(g)} />
+            <GameCard
+              key={g.id}
+              game={g}
+              onPlay={() => openPlay(g)}
+              onStop={String(g.activeMemberId) === String(user?.id) ? () => handleStop(g) : null}
+            />
           ))}
         </div>
       )}
@@ -299,7 +312,7 @@ export default function BibliotecaPage() {
 
 // ── Sub-components ───────────────────────────────────────────────────────────
 
-function GameCard({ game: g, onPlay }) {
+function GameCard({ game: g, onPlay, onStop }) {
   return (
     <div className="game-card">
       <div className="game-card-cover">
@@ -316,13 +329,24 @@ function GameCard({ game: g, onPlay }) {
             <span key={p} className={`tag ${platformTag(p)}`}>{p}</span>
           ))}
         </div>
-        {g.available && (
-          <div className="card-actions">
+        {!g.available && g.activeMemberName && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text2)', margin: '8px 0 4px' }}>
+            <span className="pulse" style={{ flexShrink: 0 }} />
+            <span>{g.activeMemberName} jugant ara</span>
+          </div>
+        )}
+        <div className="card-actions">
+          {g.available && (
             <button className="btn btn-primary btn-sm" style={{ width: '100%', justifyContent: 'center' }} onClick={onPlay}>
               <i className="ti ti-player-play" /> Jugar
             </button>
-          </div>
-        )}
+          )}
+          {!g.available && onStop && (
+            <button className="btn btn-danger btn-sm" style={{ width: '100%', justifyContent: 'center' }} onClick={onStop}>
+              <i className="ti ti-player-stop" /> Aturar partida
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -34,6 +34,7 @@
     "activeSessions": [
       {
         "id": "s1",
+        "memberId": "m3",
         "memberName": "Laia Puig",
         "gameName": "The Legend of Zelda: Tears of the Kingdom",
         "platform": "Nintendo eShop",
@@ -43,6 +44,7 @@
     "recentSessions": [
       {
         "id": "s1",
+        "memberId": "m3",
         "gameName": "The Legend of Zelda: Tears of the Kingdom",
         "gameEmoji": "🗡️",
         "memberName": "Laia Puig",
@@ -53,6 +55,7 @@
       },
       {
         "id": "s5",
+        "memberId": "m4",
         "gameName": "FIFA 25",
         "gameEmoji": "⚽",
         "memberName": "Pau Puig",
@@ -63,6 +66,7 @@
       },
       {
         "id": "s6",
+        "memberId": "m5",
         "gameName": "Minecraft",
         "gameEmoji": "⛏️",
         "memberName": "Júlia Puig",

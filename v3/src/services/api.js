@@ -63,8 +63,9 @@ export const getGameAccounts = (id) => request('GET', `/games/${id}/accounts`)
 
 // ── Sessions ──────────────────────────────────────────────────────────────────
 // GET /sessions?search=&memberId=&gameId=&page=&limit=
-export const getSessions  = (params = {}) => request('GET',  `/sessions${qs(params)}`)
-export const startSession = (data)        => request('POST', '/sessions', data)
+export const getSessions  = (params = {}) => request('GET',   `/sessions${qs(params)}`)
+export const startSession = (data)        => request('POST',  '/sessions', data)
+export const stopSession  = (id)          => request('PATCH', `/sessions/${id}/stop`)
 
 // ── Family ────────────────────────────────────────────────────────────────────
 // GET /family?search=&page=&limit=

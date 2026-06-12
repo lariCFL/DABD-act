@@ -186,6 +186,15 @@ server.get('/api/games', (req, res) => {
     const uid = getCurrentUserId(req)
     games = games.filter((g) => String(g.ownerId) === String(uid))
   }
+  // Annotate in-use games with who is currently playing
+  const activeSessions = (db.sessions?.data ?? []).filter((s) => s.isLive)
+  games = games.map((g) => {
+    if (g.available) return g
+    const active = activeSessions.find((s) => s.gameId === g.id)
+    return active
+      ? { ...g, activeSessionId: active.id, activeMemberId: active.memberId, activeMemberName: active.memberName }
+      : g
+  })
   const page  = parseInt(req.query.page)  || 1
   const limit = parseInt(req.query.limit) || 12
   res.json({ data: games, total: games.length, page, limit, totalPages: Math.ceil(games.length / limit) || 1 })
@@ -258,6 +267,32 @@ server.get('/api/sessions', (req, res) => {
   const page  = parseInt(req.query.page)  || 1
   const limit = parseInt(req.query.limit) || 15
   res.json({ data: sessions, total: sessions.length, page, limit, totalPages: Math.ceil(sessions.length / limit) || 1 })
+})
+
+// PATCH /api/sessions/:id/stop  — end a live session (owner only)
+server.patch('/api/sessions/:id/stop', (req, res) => {
+  const db      = router.db.getState()
+  const uid     = getCurrentUserId(req)
+  const session = (db.sessions?.data ?? []).find((s) => s.id === req.params.id)
+  if (!session) return res.status(404).json({ message: 'Partida no trobada' })
+  if (String(session.memberId) !== String(uid)) {
+    return res.status(403).json({ message: 'Només el jugador pot aturar la seva partida.' })
+  }
+  if (!session.isLive) {
+    return res.status(400).json({ message: 'Aquesta partida ja ha finalitzat.' })
+  }
+  const endedAt = new Date().toLocaleString('ca-ES')
+  const updated = { ...session, endedAt, isLive: false }
+  const sessions = (db.sessions?.data ?? []).map((s) =>
+    s.id === req.params.id ? updated : s
+  )
+  router.db.set('sessions.data', sessions).write()
+  // Mark game as available again
+  const games = (db.games?.data ?? []).map((g) =>
+    g.id === session.gameId ? { ...g, available: true } : g
+  )
+  router.db.set('games.data', games).write()
+  res.json(enrichSession(updated))
 })
 
 server.post('/api/sessions', (req, res) => {

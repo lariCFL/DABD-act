@@ -23,14 +23,15 @@
 
 ## 1. Project Overview
 
-**GameShare** is a family game-sharing platform. A family group (up to 5 members) shares a library of digital games across multiple platforms (Steam, PlayStation Store, Nintendo eShop, Xbox Game Pass, etc.). Each game is associated with one or more platform accounts; a family member selects an account to "start a session" when they want to play.
+**GameShare** is a family game-sharing platform. A family group (up to 5 members) shares a library of digital games across multiple platforms (Steam, PlayStation Store, Nintendo eShop, Xbox Game Pass, etc.). Each game is associated with one or more platform accounts; a family member selects an account to "start a session" when they want to play. Members can also stop their own active sessions.
 
 ### Core business rules
 
 - A **family** has a maximum of 5 members.
 - Every member belongs to **at most one family**.
 - A game is **available** if no active session is currently using it; otherwise it is **in use**.
-- **Sessions** are the play history. Once recorded, sessions are immutable from the frontend (read-only).
+- Sessions record who is playing, on which account, and for how long.
+- A member can **stop their own active session** via `PATCH /api/sessions/:id/stop`.
 - **Duration and elapsed time** are always computed and returned by the backend — the frontend never calculates them.
 - Each entity (game, account, device, rating) records `ownerId` / `memberId` so the frontend can enforce UI-level ownership checks. The backend is the authoritative source of permissions.
 
@@ -42,21 +43,22 @@
 
 - Created automatically when a user creates a new family.
 - There is exactly one administrator per family at any time.
-- Can add members (up to the 5-member limit).
-- Can remove any non-admin member.
-- Can transfer admin rights to another member (demoting themselves).
-- Can edit and delete any game, account, device, or platform in the family.
-- Sees admin-only action buttons in the UI.
+- **Admin role is strictly for family management only:**
+  - Can add members (up to the 5-member limit).
+  - Can remove any non-admin member.
+  - Can transfer admin rights to another member.
+- **Admins do NOT get extra permissions over content.** They cannot edit or delete games, accounts, devices, or reviews that belong to other members. Ownership rules apply equally to admins.
+- Sees admin-only family management buttons in the UI (add/remove members, transfer admin).
 - May have restrictions on leaving the family (backend decides; see §7).
 
 ### Regular Member
 
 - Can play any available game in the family library.
+- Can start and stop **their own** sessions.
 - Can create, edit, and delete **their own** games, accounts, devices, and reviews.
-- Cannot edit or delete resources that belong to other members.
+- Cannot edit or delete resources that belong to other members — this rule applies even if the user is admin.
 - Cannot add or remove family members.
 - Can leave the family at any time.
-- Cannot see admin controls.
 
 ---
 
@@ -98,9 +100,10 @@ The frontend calls this to invalidate server-side sessions if applicable, then c
 Displays a summary of family activity. All values are pre-computed by the backend.
 
 - **Stats block:** total games, available games, in-use games, member count, family name, hours this month, hours vs last month (as a string, e.g. "+18% vs mes anterior").
-- **Active sessions:** list of sessions that are `isLive: true`.
-- **Recent sessions:** last ~5 sessions (live or completed), with `duration` or `elapsed` from backend.
+- **Active sessions:** list of sessions that are `isLive: true`, each including `memberId`.
+- **Recent sessions:** last ~5 sessions (live or completed), each including `memberId`, with `duration` or `elapsed` from backend.
 - **Popular games:** top games by total hours played.
+- For live sessions belonging to the current user, a **"Aturar"** (stop) button is shown inline.
 
 The frontend does **not** compute any time values.
 
@@ -114,7 +117,9 @@ The frontend does **not** compute any time values.
 - Filters: free-text search (name), genre, platform.
 - Pagination: 12 per page.
 - A game shows as **available** or **in use** based on `available: boolean` returned by the backend.
+- When a game is **in use**, the backend also returns `activeMemberName`, `activeMemberId`, and `activeSessionId` so the card shows who is currently playing.
 - Any member can click **Play** on an available game.
+- If the current user is the one playing an in-use game, a **"Aturar partida"** (stop) button appears on the card.
 
 #### Play a game
 
@@ -124,14 +129,20 @@ The frontend does **not** compute any time values.
 4. Frontend calls `POST /api/sessions` with `{ gameId, accountId }`.
 5. Backend marks the game as in use.
 
+#### Stop a session (from Library)
+
+- Shown only on game cards where `activeMemberId === currentUser.id`.
+- Frontend calls `PATCH /api/sessions/:id/stop`.
+- Backend marks the session as ended, restores game `available: true`.
+
 #### Edit mode
 
 Activated by the "Editar biblioteca" button. In edit mode:
 
-- Only shows games **owned by the current user** (`ownerId == currentUser.id`) or all games if admin.
+- Only shows games **owned by the current user** (`ownerId == currentUser.id`). Admin does NOT see other members' games here.
 - Games are **grouped by platform**.
 - Free-text search and platform filter available.
-- Per game: Edit and Delete buttons, disabled / hidden for games owned by other members.
+- Per game: Edit and Delete buttons, hidden for games owned by other members.
 - "Afegir joc" button always visible in edit mode.
 
 When adding/editing a game, the form uses `platformIds[]` (array of platform IDs from `/api/platforms`) to associate the game with platforms. This prevents duplicates.
@@ -140,11 +151,12 @@ When adding/editing a game, the form uses `platformIds[]` (array of platform IDs
 
 ### Matches (Partides)
 
-**Read-only** historical view of all sessions. No create, stop, or delete from this page.
+Historical view of all sessions with the ability to stop own live sessions.
 
 - Shows all sessions, paginated (15 per page).
 - Filters: free-text (game name or member name), member, game.
-- Columns: game (emoji + name), member, platform, start time, end time / "En curs", duration / elapsed.
+- Columns: game (emoji + name), member, platform, start time, end time / "En curs", duration / elapsed, actions.
+- For live sessions belonging to the current user, a **"Aturar"** (stop) button is shown in the actions column.
 - All time values (`startedAt`, `endedAt`, `duration`, `elapsed`) are **formatted strings from the backend** (e.g. "10/06/2026 09:45", "1h 30min").
 
 ---
@@ -171,27 +183,19 @@ If the current user does not belong to a family (`GET /api/family` returns 404 o
 
 **Business rules:**
 - Maximum family size is **5 members**.
-- The "Afegir membre" button is **only visible when `memberCount < MAX_MEMBERS` (5)**. When the family already has 5 members, the button is replaced with a disabled "Família plena" indicator — the user can clearly see why the action is unavailable.
-- The frontend enforces this as a UI constraint. The **backend must also enforce it** independently (return `400` if `memberCount >= 5`) to handle concurrent requests or direct API calls.
+- The "Afegir membre" button is **only visible when `memberCount < 5`**. When the family already has 5 members, the button is replaced with a "Família plena" indicator.
+- The backend must enforce this independently — return `400` if `memberCount >= 5`.
 - Sends `POST /api/family/members` with `{ email }`.
 - Backend determines: does the user exist? Are they already in a family? Is the family full?
 - All outcomes (success or error) are shown via the backend's response message as a toast.
 
 #### Leave family
 
-**Business rules:**
-- The "Sortir" (Leave) button is **always visible** to every member, including the administrator.
-- **Regular members** can leave at any time. `DELETE /api/family/leave` returns `204`.
-- **Administrators**: the backend decides whether they can leave. The recommended policy is that an admin **cannot leave** without first transferring admin rights to another member. If this is blocked, the backend returns `400` with a descriptive message.
-- The frontend shows an amber warning in the confirmation modal when the current user is admin, informing them the backend may reject the action.
-- The frontend shows the backend's error message directly as a toast — no hardcoded leave restriction on the frontend side.
-- On success (`204`): the frontend clears `user.familyId` and `user.isAdmin` from context, which causes the Família page to switch back to the "Create Family" view.
-
-#### Transfer admin
-
-- Admin-only action per member card.
-- Two PATCH calls: demote current admin, promote selected member.
-- Recommended: backend should provide an atomic `POST /api/family/transfer-admin` endpoint (see §9).
+- The "Sortir" button is visible to every member including the administrator.
+- Regular members can leave at any time. `DELETE /api/family/leave` returns `204`.
+- Administrators: the backend should block leaving without first transferring admin rights (`400`).
+- The frontend shows an amber warning in the confirmation modal when the current user is admin.
+- On success (`204`): the frontend clears `user.familyId` and `user.isAdmin` from context.
 
 #### Transfer admin
 
@@ -208,6 +212,7 @@ Full CRUD for platform accounts belonging to family members.
 - List with filters: search (email/username), member, platform.
 - Pagination: 15 per page.
 - Eye icon opens a **detail modal** showing email + password (password toggleable).
+- Edit and Delete buttons are only shown for accounts where `memberId === currentUser.id`. Admins see the same restriction.
 - Platform selector uses `GET /api/platforms` (not free-text).
 - Member selector uses family members list.
 - On create/edit: `platformId` and `memberId` are sent (not platform name strings).
@@ -219,11 +224,21 @@ Full CRUD for platform accounts belonging to family members.
 
 Full CRUD for physical devices owned by family members.
 
-- List with filters: search (type/name), member.
+- List with filters: search (name/type/manufacturer/OS), member.
 - Pagination: 15 per page.
-- Admin can manage any device; regular member can only edit/delete their own.
-- Predefined list of device types + "Other" free-text fallback.
-- Fields: `type` (string), `name` (optional custom label), `notes` (optional), `memberId`.
+- Edit and Delete buttons are only shown for devices where `memberId === currentUser.id`. Admins cannot edit or delete other members' devices.
+- Devices follow the DB schema with two mutually exclusive categories:
+
+| Campo | Consola | Ordinador |
+|-------|---------|-----------|
+| `tipo` | `"Consola"` | `"Ordinador"` |
+| `nom` | Required | Required |
+| `fabricant` | Required | Must be null |
+| `generacio` | Required (integer > 0) | Must be null |
+| `sit_ope` | Must be null | Required |
+| `notes` | Optional | Optional |
+
+The backend must enforce this constraint (equivalent to the DB CHECK constraint).
 
 ---
 
@@ -244,7 +259,7 @@ Full CRUD for ratings of games and platforms.
 
 - Two tabs: Games and Platforms.
 - Each member can rate any game or platform.
-- Members can only **edit/delete their own** reviews. Admins can manage all.
+- Members can only **edit/delete their own** reviews. Admins have no extra permission here — they can only edit/delete their own reviews too.
 - Fields: `targetId`, `targetType` (`"game"` | `"platform"`), `score` (1–5), `comment` (optional).
 
 ---
@@ -312,6 +327,9 @@ Full CRUD for ratings of games and platforms.
   "platformIds": ["p3"],
   "ownerId": "m1",
   "available": false,
+  "activeSessionId": "s1",
+  "activeMemberId": "m3",
+  "activeMemberName": "Laia Puig",
   "accounts": [
     {
       "id": "a5",
@@ -323,6 +341,7 @@ Full CRUD for ratings of games and platforms.
   ]
 }
 ```
+> `activeSessionId`, `activeMemberId`, `activeMemberName` are only present when `available: false`.  
 > `accounts` is embedded in the game object when calling `GET /api/games/:id/accounts`.
 
 ### Session
@@ -344,7 +363,9 @@ Full CRUD for ratings of games and platforms.
 }
 ```
 > `startedAt` and `endedAt` are **formatted strings** (locale `ca-ES`), not ISO timestamps.  
-> `duration` is populated when `isLive = false`. `elapsed` is populated when `isLive = true`.
+> `duration` is computed and populated by the backend when `isLive = false`.  
+> `elapsed` is computed and populated by the backend when `isLive = true`.  
+> Neither `duration` nor `elapsed` is stored — they are always derived at query time.
 
 ### Account
 ```json
@@ -375,17 +396,42 @@ Full CRUD for ratings of games and platforms.
 ```
 
 ### Device
+
+Devices are either a **Consola** or an **Ordinador**. The fields differ by category:
+
+**Consola:**
 ```json
 {
   "id": "dev1",
   "memberId": "m1",
   "memberName": "Marc Puig",
-  "type": "PlayStation 5",
-  "name": "PS5 del saló",
+  "tipo": "Consola",
+  "nom": "PS5 del saló",
+  "fabricant": "Sony",
+  "generacio": 5,
+  "sit_ope": null,
   "notes": "TV principal, 4K HDR",
   "createdAt": "2024-01-10"
 }
 ```
+
+**Ordinador:**
+```json
+{
+  "id": "dev2",
+  "memberId": "m1",
+  "memberName": "Marc Puig",
+  "tipo": "Ordinador",
+  "nom": "PC Gaming Marc",
+  "fabricant": null,
+  "generacio": null,
+  "sit_ope": "Windows",
+  "notes": "RTX 4070, 32GB RAM",
+  "createdAt": "2023-06-15"
+}
+```
+
+> The DB enforces a `CHECK` constraint: `Consola` requires `fabricant` + `generacio` (both not null) and `sit_ope` must be null; `Ordinador` requires `sit_ope` (not null) and `fabricant` + `generacio` must be null.
 
 ### Rating
 ```json
@@ -417,13 +463,24 @@ Full CRUD for ratings of games and platforms.
     "hoursThisMonth": 94,
     "hoursVsLastMonth": "+18% vs mes anterior"
   },
-  "activeSessions": [ { /* Session (isLive: true) */ } ],
-  "recentSessions":  [ { /* Session */ } ],
+  "activeSessions": [
+    {
+      "id": "s1",
+      "memberId": "m3",
+      "memberName": "Laia Puig",
+      "gameName": "The Legend of Zelda: Tears of the Kingdom",
+      "platform": "Nintendo eShop",
+      "startedAt": "2026-06-10T09:45:00"
+    }
+  ],
+  "recentSessions": [ { /* Session with memberId */ } ],
   "popularGames": [
     { "id": "g1", "name": "Zelda: ToTK", "emoji": "🗡️", "totalHours": 142 }
   ]
 }
 ```
+> `activeSessions` and `recentSessions` entries must include `memberId` so the frontend can check ownership for the stop button.  
+> `duration` and `elapsed` in `recentSessions` are computed by the backend, never stored.
 
 ---
 
@@ -478,7 +535,8 @@ Returns the full profile of the authenticated user including stats.
 ### Dashboard
 
 #### `GET /api/dashboard`
-Returns the full dashboard object (see §5 Dashboard model). No query parameters.
+Returns the full dashboard object (see §5 Dashboard model). No query parameters.  
+Backend must compute `duration`/`elapsed` for all sessions in `recentSessions` before returning. Must include `memberId` on all session entries.
 
 ---
 
@@ -502,13 +560,6 @@ Create a new family. Authenticated user becomes admin. Family name must be uniqu
 { "name": "Família García" }
 
 // 201 Response — family object
-{
-  "id": "f2",
-  "name": "Família García",
-  "memberCount": 1,
-  "members": [{ "id": "m1", "name": "Marc Puig", "isAdmin": true, ... }]
-}
-
 // 409 — name already taken
 { "message": "Ja existeix una família amb el nom \"Família García\"." }
 // 400 — name missing or blank
@@ -519,7 +570,7 @@ Create a new family. Authenticated user becomes admin. Family name must be uniqu
 Authenticated user leaves their family.
 
 ```
-// 204 — success (regular member left, or admin left if policy allows)
+// 204 — success
 // 400 — admin cannot leave without transferring first:
 { "message": "L'administrador no pot sortir de la família sense transferir primer l'administració." }
 ```
@@ -570,13 +621,15 @@ Remove a member from the family (admin only).
 ### Games
 
 #### `GET /api/games`
-Query params: `search`, `genre`, `platform` (platform name), `ownedByMe` (boolean, filters to current user's games), `page`, `limit`
+Query params: `search`, `genre`, `platform` (platform name), `ownedByMe` (boolean — filters to **current user's games only**, no admin override), `page`, `limit`
+
+For games where `available: false`, the response must include `activeSessionId`, `activeMemberId`, and `activeMemberName` (resolved from the current live session for that game).
 
 #### `GET /api/games/:id`
 Returns single game with embedded accounts array.
 
 #### `GET /api/games/:id/accounts`
-Returns accounts that can be used to play this game.
+Returns accounts that can be used to play this game (accounts whose `platformId` is in the game's `platformIds`).
 
 ```json
 // 200
@@ -604,13 +657,20 @@ Returns accounts that can be used to play this game.
 ```
 
 #### `PATCH /api/games/:id`
-Same structure as POST. Backend enforces: only owner or admin can edit.
+Same structure as POST. Backend enforces: **only owner** can edit. Admin has no special access.
+
+```
+// 403 if not owner:
+{ "message": "Només el propietari pot editar aquest joc." }
+```
 
 #### `DELETE /api/games/:id`
+**Only owner** can delete. Admin has no special access.
+
 ```
 // 204 on success
-// 403 if not owner/admin
-{ "message": "No tens permís per eliminar aquest joc." }
+// 403 if not owner:
+{ "message": "Només el propietari pot eliminar aquest joc." }
 ```
 
 ---
@@ -620,17 +680,29 @@ Same structure as POST. Backend enforces: only owner or admin can edit.
 #### `GET /api/sessions`
 Query params: `search`, `memberId`, `gameId`, `page`, `limit`
 
-All sessions are returned including live (`isLive: true`) and completed.
+All sessions are returned including live and completed. Backend **must compute** `elapsed` (for live) and `duration` (for completed) before returning — these are never stored.
 
 #### `POST /api/sessions`
 ```json
 { "gameId": "g1", "accountId": "a5" }
-// 201 — session object (backend resolves member from token, marks game as in use)
+// 201 — session object (backend resolves memberId from token, marks game as in use)
 // 409 if game already in use:
 { "message": "Aquest joc ja està en ús." }
 ```
 
-> **Note:** There is no stop-session or delete-session endpoint exposed from the frontend. Sessions are created when a game is started; the backend should determine how/when sessions end (e.g. when another member claims the game, or via a separate admin panel).
+#### `PATCH /api/sessions/:id/stop`
+Stop an active session. **Only the member who started the session** can stop it.
+
+```
+// 200 — updated session object (isLive: false, endedAt set, duration computed)
+// 400 — session already ended:
+{ "message": "Aquesta partida ja ha finalitzat." }
+// 403 — not the session owner:
+{ "message": "Només el jugador pot aturar la seva partida." }
+// 404 — session not found
+```
+
+Side effect: restores the game's `available` to `true`.
 
 ---
 
@@ -680,33 +752,68 @@ Returns full account record including `password`.
 ```
 
 #### `PATCH /api/accounts/:id`
-Same structure as POST. If `password` is empty string or absent, do not change the password.
+**Only the account owner** (`memberId`) can edit. Admin has no special access.
+
+```
+// 403 if not owner:
+{ "message": "Només el propietari pot editar aquest compte." }
+```
+
+If `password` is empty string or absent, do not change the password.
 
 #### `DELETE /api/accounts/:id`
+**Only the account owner** can delete. Admin has no special access.
+
+```
+// 403 if not owner:
+{ "message": "Només el propietari pot eliminar aquest compte." }
+```
 
 ---
 
 ### Devices
 
 #### `GET /api/devices`
-Query params: `search` (type/name), `memberId`, `page`, `limit`
+Query params: `search` (matches `nom`, `tipo`, `fabricant`, `sit_ope`), `memberId`, `page`, `limit`
 
 #### `POST /api/devices`
 ```json
+// Consola
 {
   "memberId": "m1",
-  "type": "PlayStation 5",
-  "name": "PS5 del saló",
+  "tipo": "Consola",
+  "nom": "PS5 del saló",
+  "fabricant": "Sony",
+  "generacio": 5,
   "notes": "TV principal, 4K HDR"
 }
-// Backend sets ownerId/memberId from token if not admin; name and notes are optional
+
+// Ordinador
+{
+  "memberId": "m1",
+  "tipo": "Ordinador",
+  "nom": "PC Gaming Marc",
+  "sit_ope": "Windows",
+  "notes": "RTX 4070, 32GB RAM"
+}
 ```
+Backend sets `memberId` from token if not admin; admin can assign `memberId` to any family member.
 
 #### `PATCH /api/devices/:id`
-Backend enforces: only owner or admin.
+**Only the device owner** (`memberId`) can edit. Admin has no special access.
+
+```
+// 403 if not owner:
+{ "message": "Només el propietari pot editar aquest dispositiu." }
+```
 
 #### `DELETE /api/devices/:id`
-Backend enforces: only owner or admin.
+**Only the device owner** can delete. Admin has no special access.
+
+```
+// 403 if not owner:
+{ "message": "Només el propietari pot eliminar aquest dispositiu." }
+```
 
 ---
 
@@ -727,10 +834,20 @@ Query params: `type` (`game` | `platform`), `search` (target name), `page`, `lim
 ```
 
 #### `PATCH /api/ratings/:id`
-Backend enforces: only author or admin.
+**Only the review author** (`memberId`) can edit. Admin has no special access.
+
+```
+// 403 if not author:
+{ "message": "Només el propietari pot editar aquesta valoració." }
+```
 
 #### `DELETE /api/ratings/:id`
-Backend enforces: only author or admin.
+**Only the review author** can delete. Admin has no special access.
+
+```
+// 403 if not author:
+{ "message": "Només el propietari pot eliminar aquesta valoració." }
+```
 
 ---
 
@@ -738,25 +855,25 @@ Backend enforces: only author or admin.
 
 | Rule | Entity | Details |
 |------|--------|---------|
-| Family name uniqueness | Family | Names must be globally unique. Return 409 on conflict: `"Ja existeix una família amb el nom \"X\"."` |
-| Max 5 members | Family | `POST /api/family/members` returns 400 if `memberCount >= 5`. Frontend hides/disables the button, but the backend must enforce this independently (e.g., a DB constraint or serialized transaction) to handle concurrent requests. |
-| Creator becomes admin | Family | `POST /api/family` always sets `isAdmin: true` for the creator. There is exactly one admin per family at any time. |
+| Family name uniqueness | Family | Names must be globally unique. Return 409 on conflict. |
+| Max 5 members | Family | `POST /api/family/members` returns 400 if `memberCount >= 5`. Backend enforces independently of frontend. |
+| Creator becomes admin | Family | `POST /api/family` always sets `isAdmin: true` for the creator. One admin per family at any time. |
 | One family per user | Member | A user cannot belong to two families simultaneously. Return 409 on `POST /api/family/members` if the user already has a `familyId`. |
-| Admin leave restriction | Family | Recommended: admin cannot leave without transferring first. Return 400 with a Catalan message. The frontend shows this as a toast without any hardcoded restriction. |
-| Exactly one admin | Family | If the last member leaves or admin is removed (edge case), decide a graceful fallback: dissolve the family, or auto-promote. Document and implement this policy. |
-| Admin cannot be removed | Family | `DELETE /api/family/members/:id` must return 403 if the target member is the admin. |
-| Game ownership | Game | Only the owner (`ownerId`) or an admin can edit/delete a game. Return 403 otherwise. |
+| Admin leave restriction | Family | Admin cannot leave without transferring first. Return 400. |
+| Admin cannot be removed | Family | `DELETE /api/family/members/:id` returns 403 if the target is the admin. |
+| **Strict ownership — no admin bypass** | Game, Account, Device, Rating | Only the owner/author (`ownerId` or `memberId`) can PATCH or DELETE their resource. Admin role confers **no extra permission** here. Always return 403 for non-owners, regardless of admin status. |
+| `ownedByMe` filter | Game | `GET /api/games?ownedByMe=true` returns only games where `ownerId === currentUser.id`. Admin does not see all games — only their own. |
 | Game in use | Session | Cannot start a session for a game that already has `isLive: true`. Return 409. |
-| Account ownership | Account | Only the member (`memberId`) or an admin can edit/delete. Return 403. |
-| Device ownership | Device | Only the owner (`memberId`) or an admin. Return 403. |
-| Review ownership | Rating | Only the author (`memberId`) or an admin. Return 403. |
-| Platform deletion | Platform | Cannot delete a platform that has associated games or accounts. Return 409. |
+| Stop session ownership | Session | Only `session.memberId === currentUser.id` can call `PATCH /api/sessions/:id/stop`. |
+| Device tipo constraint | Device | `Consola`: `fabricant` + `generacio` required, `sit_ope` must be null. `Ordinador`: `sit_ope` required, `fabricant` + `generacio` must be null. Return 400 on violation. |
+| Platform deletion | Platform | Cannot delete a platform with associated games or accounts. Return 409. |
 | Password on edit | Account | If `password` field is missing or empty string in PATCH, leave it unchanged. |
 | Age rating | Game | Integer 0–18. |
-| Score range | Rating | Integer 1–5. |
+| Score range | Rating | Numeric 0–5 (supports decimals, e.g. 4.5). |
+| `generacio` | Device (Consola) | Integer > 0. |
 | Email format | All | Standard email validation. Return 400 with descriptive message. |
-| Duration computation | Session | Backend always computes `duration` and `elapsed`; never trust the frontend for these. |
-| SQL injection prevention | All | Always use parameterised queries. Never concatenate user input into SQL strings. |
+| Duration computation | Session | Backend always computes `duration` and `elapsed` at query time from `startedAt`/`endedAt`. Never store or trust these values from the client. |
+| SQL injection prevention | All | Always use parameterised queries. |
 
 ---
 
@@ -779,7 +896,7 @@ The frontend reads `error.message` from every caught exception and displays it d
 | 204 | No Content (DELETE, logout) |
 | 400 | Bad Request (validation failure, business rule violation) |
 | 401 | Unauthorized (missing/invalid/expired token) |
-| 403 | Forbidden (authenticated but not permitted) |
+| 403 | Forbidden (authenticated but not permitted — always means "not the owner") |
 | 404 | Not Found |
 | 409 | Conflict (duplicate name, already in family, game in use) |
 | 500 | Internal Server Error |
@@ -793,6 +910,16 @@ The frontend reads `error.message` from every caught exception and displays it d
 - **JWT authentication** is preferred. Store the `userId` in the JWT payload so any route can identify the caller without a DB lookup on `/me`.
 - **Soft-delete** games, accounts, and sessions rather than hard-deleting, to preserve session history integrity.
 - The `GET /api/me` endpoint is called on every page load (token restore). Keep it fast — consider caching.
+
+### Ownership enforcement
+
+Every `PATCH` and `DELETE` handler for games, accounts, devices, and ratings must:
+1. Extract `userId` from the JWT.
+2. Fetch the resource from the DB.
+3. Compare `resource.ownerId` (or `resource.memberId`) with `userId`.
+4. Return **403** if they do not match — regardless of whether the user is an admin.
+
+There is **no admin bypass** on content ownership. The admin role only governs family management endpoints (`/family/members`).
 
 ### Atomic admin transfer
 
@@ -809,10 +936,22 @@ which transfers in a single transaction.
 
 ### Session lifecycle
 
-The frontend only starts sessions; it does not stop them. Options for the backend:
-- **Inactivity timeout:** auto-close sessions after N hours of inactivity.
-- **Admin panel:** provide a separate management interface to close stuck sessions.
-- **Next-start policy:** when a member starts a session on a game, automatically close any existing live session for that game.
+Sessions are started via `POST /api/sessions` and stopped via `PATCH /api/sessions/:id/stop` (owner only). The stop endpoint must:
+1. Set `endedAt` to the current timestamp.
+2. Set `isLive` to `false`.
+3. Set `game.available` to `true`.
+4. Return the updated session object with `duration` computed.
+
+`duration` and `elapsed` are **never stored in the database** — they are always computed from `startedAt` and `endedAt` (or `NOW()` for live sessions) at query time.
+
+### Active session annotation on games
+
+`GET /api/games` must annotate games where `available: false` with:
+- `activeSessionId` — the ID of the live session
+- `activeMemberId` — the member currently playing
+- `activeMemberName` — their display name
+
+This is a JOIN query: `sessions WHERE gameId = game.id AND isLive = true LIMIT 1`.
 
 ### Platform accounts on games
 
@@ -820,16 +959,11 @@ The frontend only starts sessions; it does not stop them. Options for the backen
 
 ### Password storage
 
-Never store passwords in plaintext. Use bcrypt (or argon2) with an appropriate cost factor. The `password` field returned in account details (`GET /api/accounts/:id` and `/api/family/members/:id/accounts`) should be the **decryptable** stored credential for the gaming platform — this is a platform credential manager use case, not the user's own login password. Consider encrypting these at rest (e.g. AES-256-GCM with a server-side key).
+Never store passwords in plaintext. Use bcrypt (or argon2) with an appropriate cost factor. The `password` field returned in account details is a **platform credential** (e.g. Steam login), not the user's own app password. Consider encrypting these at rest (e.g. AES-256-GCM with a server-side key).
 
 ### Family size enforcement
 
-Enforce `memberCount < 5` at **both** the application level and the database level:
-
-- **Application level:** check in `POST /api/family/members` before inserting.
-- **Database level:** use a constraint or a serialized transaction (e.g., `SELECT COUNT(*) ... FOR UPDATE` in PostgreSQL) to prevent race conditions if two admins add members simultaneously (unlikely but possible).
-
-The frontend hides the "Add Member" button when `memberCount >= 5` and shows a "Família plena" notice, but it **does not block** direct API calls. The backend is the authoritative guard.
+Enforce `memberCount < 5` at both the application level and the database level (serialized transaction or DB constraint) to prevent race conditions.
 
 ### Pagination
 
@@ -882,14 +1016,14 @@ src/
 │   └── UI.jsx                   # Toast, Modal, Stars, LoadingState, ErrorState, EmptyState
 └── pages/
     ├── LoginPage.jsx            # Auth gate
-    ├── DashboardPage.jsx        # Family overview
-    ├── BibliotecaPage.jsx       # Game library — browse + edit mode
-    ├── PartidesPage.jsx         # Session history (read-only)
+    ├── DashboardPage.jsx        # Family overview + stop own sessions
+    ├── BibliotecaPage.jsx       # Game library — browse (with who is playing) + edit mode
+    ├── PartidesPage.jsx         # Session history + stop own live sessions
     ├── FamiliaPage.jsx          # Family management + create family
-    ├── ComptesPage.jsx          # Platform accounts CRUD
-    ├── DispositiusPage.jsx      # Physical devices CRUD
-    ├── PlataformesPage.jsx      # Platform definitions CRUD (admin)
-    ├── ValoracionsPage.jsx      # Reviews CRUD
+    ├── ComptesPage.jsx          # Platform accounts CRUD (own only)
+    ├── DispositiusPage.jsx      # Physical devices CRUD (own only, Consola/Ordinador schema)
+    ├── PlataformesPage.jsx      # Platform definitions CRUD (admin only)
+    ├── ValoracionsPage.jsx      # Reviews CRUD (own only)
     └── PerfilPage.jsx           # User profile editor
 ```
 
@@ -899,12 +1033,13 @@ src/
 |--------|-------------|-------|
 | Family | 1 : N → Member | Max 5 members |
 | Member | N : 1 → Family | One family per member |
-| Member | 1 : N → Account | Platform accounts |
-| Member | 1 : N → Device | Physical devices |
-| Member | 1 : N → Rating | Reviews authored |
-| Member | 1 : N → Session | Play history |
+| Member | 1 : N → Account | Platform accounts (owner-only edit/delete) |
+| Member | 1 : N → Device | Physical devices (owner-only edit/delete) |
+| Member | 1 : N → Rating | Reviews authored (author-only edit/delete) |
+| Member | 1 : N → Session | Play history (owner can stop own live session) |
 | Game   | N : N → Platform | Via `platformIds[]` |
 | Game   | N : N → Account  | Accounts that can play it |
 | Session | N : 1 → Game | Each session plays one game |
 | Session | N : 1 → Account | Each session uses one account |
 | Rating | N : 1 → Game or Platform | Polymorphic via `targetType` |
+| Dispositiu | two subtypes | `Consola` (fabricant + generacio) or `Ordinador` (sit_ope) |
